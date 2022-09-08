@@ -1,0 +1,22 @@
+__BASE__: "{fileDirname}/open_fridge_v0.yaml"
+
+TASK:
+  MEASUREMENTS:
+    - GripperToMarkerDistance
+    - GripperToRestingDistance
+    - MarkerToGoalDistance
+    - SetMarkerSuccess
+    - RearrangeSetSuccess
+    - GripperStatus
+    - InvalidGraspPenalty
+    - InRegion
+    - OutOfRegionPenalty
+    - CollisionPenalty
+    - RearrangeSetMarkerReward
+    - BaseActionPenalty
+
+  BaseActionPenalty:
+    TYPE: ActionPenalty
+    UUID: "base_action_penalty"
+    SUB_ACTION: base_action
+    PENALTY: 0.008

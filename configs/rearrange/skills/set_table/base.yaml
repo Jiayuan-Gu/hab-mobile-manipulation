@@ -1,0 +1,37 @@
+__BASE__: "{fileDirname}/../__base__.py"
+BASE_RUN_DIR: "data/results/rearrange/skills/set_table/{fileName}"
+
+TASK_CONFIG:
+  DATASET:
+    DATA_PATH: "data/datasets/rearrange/v3/set_table_220417_{split}.json.gz"
+
+TRAINER_NAME: "ppo-v0"
+ENV_NAME: "RearrangeRLEnv-v0"
+NUM_ENVIRONMENTS: 64
+TOTAL_NUM_STEPS: 1e8
+
+LOG_INTERVAL: 10
+NUM_CHECKPOINTS: 10
+CHECKPOINT_INTERVAL: 150 # about 1M steps
+SPLIT_DATASET: True # save memory
+
+RL:
+  PPO:
+    clip_param: 0.2
+    ppo_epoch: 2
+    num_mini_batch: 2
+    value_loss_coef: 0.5
+    entropy_coef: 0.0
+    lr: 3e-4
+    eps: 1e-5
+    max_grad_norm: 0.5
+    num_steps: 128
+    use_gae: True
+    gamma: 0.99
+    tau: 0.95
+    use_normalized_advantage: True
+    use_linear_clip_decay: False
+    use_linear_lr_decay: True
+
+  POLICY:
+    USE_PREV_ACTIONS: True

@@ -1,0 +1,141 @@
+__BASE__: "{fileDirname}/__base__.py"
+
+SIMULATOR:
+  TYPE: RearrangeSim-v0
+  SIM_FREQ: 120
+  CONTROL_FREQ: 4
+  VERBOSE: False
+  FETCH_ROBOT:
+    TYPE: "hab_fetch"
+    PARAMS: {}
+
+  AGENT_0:
+    SENSORS:
+      - "HEAD_RGB_SENSOR"
+      - "HEAD_DEPTH_SENSOR"
+      - "ARM_RGB_SENSOR"
+      - "ARM_DEPTH_SENSOR"
+      - "THIRD_RGB_SENSOR"
+  THIRD_RGB_SENSOR:
+    HEIGHT: 512
+    WIDTH: 512
+  SCENE_DATASET: "data/replica_cad/replicaCAD.scene_dataset_config.json"
+
+TASK:
+  USE_BAKED_SCENES: False
+
+  ACTIONS:
+    EmptyAction:
+      TYPE: EmptyAction
+    ArmGripperAction:
+      TYPE: ArmGripperAction
+      ARM_ACTION:
+        TYPE: ArmEEAction
+        CTRL_SCALE: 0.015
+      GRIPPER_ACTION:
+        TYPE: MagicGraspAction
+        THRESHOLD: 0.15
+    BaseVelAction:
+      TYPE: BaseVelAction
+      LIN_SCALE: 3.0
+      ANG_SCALE: 3.0
+      UPDATE_GRASP: True
+    BaseArmGripperAction:
+      TYPE: BaseArmGripperAction
+      BASE_ACTION:
+        TYPE: BaseVelAction
+        LIN_SCALE: 1.5
+        ANG_SCALE: 1.5
+        UPDATE_GRASP: True
+      ARM_ACTION:
+        TYPE: ArmEEAction
+        CTRL_SCALE: 0.015
+      GRIPPER_ACTION:
+        TYPE: MagicGraspAction
+        THRESHOLD: 0.15
+    BaseDiscVelAction:
+      TYPE: BaseDiscVelAction
+      LIN_SCALE: 3.0
+      ANG_SCALE: 3.0
+      UPDATE_GRASP: True
+      END_ON_STOP: True
+    ArmGripperAction2:
+      TYPE: ArmGripperAction
+      ARM_ACTION:
+        TYPE: ArmRelPosAction
+        CTRL_SCALE: 0.025
+      GRIPPER_ACTION:
+        TYPE: MagicGraspAction
+        THRESHOLD: 0.15
+    BaseArmGripperAction2:
+      TYPE: BaseArmGripperAction
+      BASE_ACTION:
+        TYPE: BaseVelAction
+        LIN_SCALE: 1.5
+        ANG_SCALE: 1.5
+        UPDATE_GRASP: True
+      ARM_ACTION:
+        TYPE: ArmRelPosAction
+        CTRL_SCALE: 0.025
+      GRIPPER_ACTION:
+        TYPE: MagicGraspAction
+        THRESHOLD: 0.15
+    BaseVelAction2:
+      TYPE: BaseVelStopAction
+      LIN_SCALE: 3.0
+      ANG_SCALE: 3.0
+      UPDATE_GRASP: True
+      END_ON_STOP: True
+
+  # Sensors
+  ArmJointPositionSensor:
+    TYPE: ArmJointPositionSensor
+  ArmJointVelocitySensor:
+    TYPE: ArmJointVelocitySensor
+  IsGraspedSensor:
+    TYPE: IsGraspedSensor
+  GripperPositionSensor:
+    UUID: "gripper_pos_at_base"
+    TYPE: GripperPositionSensor
+    FRAME: "base"
+
+  PickGoalSensor:
+    UUID: "pick_goal_at_gripper"
+    TYPE: PickGoalSensor
+    FRAME: "gripper"
+  PickGoalSensor2:
+    UUID: "pick_goal_at_base"
+    TYPE: PickGoalSensor
+    FRAME: "base"
+  PlaceGoalSensor:
+    UUID: "place_goal_at_gripper"
+    TYPE: PlaceGoalSensor
+    FRAME: "gripper"
+  PlaceGoalSensor2:
+    UUID: "place_goal_at_base"
+    TYPE: PlaceGoalSensor
+    FRAME: "base"
+  RestingPositionSensor:
+    UUID: "resting_pos_at_base"
+    TYPE: RestingPositionSensor
+    FRAME: "base"
+
+  BasePositionSensor:
+    UUID: "base_pos_at_episode"
+    TYPE: BasePositionSensor
+    FRAME: "start_base"
+  BaseHeadingSensor:
+    UUID: "base_heading_at_episode"
+    TYPE: BaseHeadingSensor
+    EPISODIC: True
+  NavGoalSensor:
+    UUID: "nav_goal_at_base"
+    TYPE: NavGoalSensor
+    FRAME: "base"
+
+DATASET:
+  TYPE: RearrangeDataset-v0
+  SPLIT: "train"
+  DATA_PATH: "data/datasets/rearrange/v3/tidy_house_220417_{split}.json.gz"
+  EPISODE_IDS: []
+  NUM_EPISODES: -1

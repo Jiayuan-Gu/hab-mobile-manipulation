@@ -1,0 +1,91 @@
+__BASE__: "{fileDirname}/../base.yaml"
+
+DATASET:
+  DATA_PATH: "data/datasets/rearrange/v3/set_table_220417_{split}.json.gz"
+
+ENVIRONMENT:
+  MAX_EPISODE_STEPS: 4500
+
+TASK:
+  TYPE: SetTableTask-v0
+  EE_NOISE: 0.0
+
+  POSSIBLE_ACTIONS:
+    - BaseArmGripperAction
+    - BaseArmGripperAction2
+    - ArmGripperAction
+    - ArmGripperAction2
+    - BaseVelAction
+    - BaseVelAction2
+    - BaseDiscVelAction
+    - EmptyAction
+
+  ACTIONS:
+    BaseDiscVelAction:
+      TYPE: BaseDiscVelAction
+      END_ON_STOP: False
+    BaseVelAction2:
+      TYPE: BaseVelStopAction
+      END_ON_STOP: False
+
+  SENSORS:
+    - RestingPositionSensor
+    # nav
+    - NavGoalSensor
+    # manip
+    - ArmJointPositionSensor
+    - GripperPositionSensor
+    - IsGraspedSensor
+    - PickGoalSensor
+    - PickGoalSensor2
+    - PlaceGoalSensor
+    - PlaceGoalSensor2
+
+  MEASUREMENTS:
+    - GripperToRestingDistance
+    - InvalidGrasp
+    - GripperStatus
+    - StageSuccess
+
+  GripperToRestingDistance:
+    TYPE: GripperToRestingDistance
+  InvalidGrasp:
+    # TYPE: InvalidGrasp
+    TYPE: InvalidGraspV1
+  GripperStatus:
+    TYPE: GripperStatus
+
+  StageSuccess:
+    TYPE: StageSuccess
+    GOALS:
+      open_0:
+        - "opened_drawer(target_marker|0)"
+      pick_0:
+        # - "opened_drawer(target_marker|0)"
+        - "holding(target_obj|0)"
+      place_0:
+        - "not_holding()"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+      close_0:
+        - "closed_drawer(target_marker|0)"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+
+      open_1:
+        - "closed_drawer(target_marker|0)"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "opened_fridge(target_marker|1)"
+      pick_1:
+        - "closed_drawer(target_marker|0)"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "opened_fridge(target_marker|1)"
+        - "holding(target_obj|1)"
+      place_1:
+        - "closed_drawer(target_marker|0)"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "not_holding()"
+        - "at(target_obj_pos|1,target_goal_pos|1)"
+      close_1:
+        - "closed_drawer(target_marker|0)"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "closed_fridge(target_marker|1)"
+        - "at(target_obj_pos|1,target_goal_pos|1)"

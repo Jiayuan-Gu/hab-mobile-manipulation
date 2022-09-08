@@ -1,0 +1,46 @@
+__BASE__: "{fileDirname}/../__base__.py"
+BASE_RUN_DIR: "data/results/rearrange/composite/prepare_groceries/{fileName}"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/composite/prepare_groceries.yaml"
+
+RL:
+  SUCCESS_MEASURE: "stage_success.place_2"
+  END_ON_SUCCESS: False
+
+SOLUTION:
+  SKILL_SEQUENCE:
+    - PickAndPlace
+    - NextTarget
+    - PickAndPlace
+    - NextTarget
+    - PickAndPlace
+
+  SKILLS:
+    - PickAndPlace
+    - NextTarget
+
+  NextTarget:
+    TYPE: NextTarget
+
+  # Nested composite skills
+  ########################################################
+  PickAndPlace:
+    TYPE: CompositeSkill
+    SKILL_SEQUENCE:
+      - NavRLSkill
+      - ResetArm
+      - PickRLSkill
+      - ResetArm
+      - NavRLSkill
+      - ResetArm
+      - PlaceRLSkill
+      - ResetArm
+    SKILLS:
+      - NavRLSkill
+      - PickRLSkill
+      - PlaceRLSkill
+      - ResetArm
+
+    ResetArm:
+      TYPE: ResetArm
+      TIMEOUT: 50
+  ########################################################

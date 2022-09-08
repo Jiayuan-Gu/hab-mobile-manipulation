@@ -1,0 +1,39 @@
+__BASE__: "{fileDirname}/nav_v0.yaml"
+
+TASK:
+  TYPE: RearrangeNavTask-v1
+
+  MEASUREMENTS:
+    - GeoDistanceToNavGoals
+    - AngDistanceToGoal
+    - RearrangeNavSuccess
+    - RearrangeNavReward
+    - RobotForce
+    - ForcePenalty
+
+  GeoDistanceToNavGoals:
+    UUID: "geo_dist_to_nav_goal"
+    TYPE: GeoDistanceToNavGoalsV1
+    MIN_DIST: 0.05
+  AngDistanceToGoal:
+    UUID: "ang_dist_to_nav_goal"
+    TYPE: AngDistanceToGoalV1
+  RearrangeNavSuccess:
+    TYPE: RearrangeNavSuccess
+    GEO_THRESHOLD: 0.1
+    ANG_THRESHOLD: 0.25
+  RearrangeNavReward:
+    TYPE: RearrangeNavReward
+    GEO_DIST_REWARD: 1.0
+    ANG_DIST_REWARD: 0.0
+    ANG_REWARD_THRESH: -1.0
+  RobotForce:
+    TYPE: RobotForce
+    MIN_DELTA_FORCE: 20.0
+    INCLUDE_OBJ_COLLISIONS: True
+  ForcePenalty:
+    TYPE: ForcePenalty
+    FORCE_PENALTY: 0.001
+    MAX_FORCE_PENALTY: 0.2
+    MAX_ACCUM_FORCE: -1.0
+    MAX_ACCUM_FORCE_PENALTY: 1.0

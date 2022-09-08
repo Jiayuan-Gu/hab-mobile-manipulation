@@ -1,0 +1,65 @@
+__BASE__: "{fileDirname}/base.yaml"
+
+ENVIRONMENT:
+  MAX_EPISODE_STEPS: 200
+
+DATASET:
+  DATA_PATH: "data/datasets/rearrange/v3/set_table_220417_{split}.json.gz"
+
+TASK:
+  TYPE: RearrangeCloseDrawerTask-v0
+  USE_MARKER_T: True
+  SPAWN_REGION: [[0.30, -0.35], [0.45, 0.35]]
+  BASE_NOISE: 0.1
+  BASE_ANGLE_NOISE: 0.25
+
+  POSSIBLE_ACTIONS:
+    - ArmGripperAction
+    - ArmGripperAction2
+
+  SENSORS:
+    - ArmJointPositionSensor
+    - GripperPositionSensor
+    - IsGraspedSensor
+    - PickGoalSensor
+    - PickGoalSensor2
+
+  MEASUREMENTS:
+    - GripperToMarkerDistance
+    - GripperToRestingDistance
+    - MarkerToGoalDistance
+    - SetMarkerSuccess
+    - RearrangeSetSuccess
+    - GripperStatus
+    - InvalidGraspPenalty
+    - RearrangeSetMarkerReward
+  GripperToMarkerDistance:
+    TYPE: GripperToMarkerDistance
+  GripperToRestingDistance:
+    TYPE: GripperToRestingDistance
+  MarkerToGoalDistance:
+    TYPE: MarkerToGoalDistance
+    USE_ABS: True
+  SetMarkerSuccess:
+    TYPE: SetMarkerSuccess
+    THRESHOLD: 0.1
+  RearrangeSetSuccess:
+    TYPE: RearrangeSetSuccess
+    THRESHOLD: 0.15
+  GripperStatus:
+    TYPE: GripperStatusV1
+  InvalidGraspPenalty:
+    TYPE: InvalidGraspPenalty
+    THRESHOLD: 0.2
+    PENALTY: 1.0
+    END_EPISODE: True
+  RearrangeSetMarkerReward:
+    TYPE: RearrangeSetMarkerReward
+    DIST_REWARD: 2.0
+    SUCC_REWARD: 0.0
+    PICK_REWARD: 1.0
+    PICK_PENALTY: 1.0
+    END_PICK_WRONG: True
+    DROP_REWARD: 1.0
+    DROP_PENALTY: 0.0
+    END_DROP: True

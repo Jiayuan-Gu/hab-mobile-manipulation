@@ -1,0 +1,10 @@
+__BASE__: "{fileDirname}/close_drawer_v0_joint_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/close_drawer_v0A.yaml"
+
+RL:
+  ACTION_NAME: "BaseArmGripperAction2"
+  REWARD_MEASURES:
+    - "rearrange_set_reward"
+    - "invalid_grasp_penalty"
+    - "out_of_region_penalty"
+    - "base_action_penalty"

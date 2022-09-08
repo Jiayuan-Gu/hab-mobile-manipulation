@@ -1,0 +1,61 @@
+__BASE__: "{fileDirname}/base.yaml"
+
+SOLUTION:
+  NavRLSkill:
+    TYPE: NavRLSkill
+    ACTION: BaseDiscVelAction
+    CKPT_PATH: "data/results/rearrange/skills/set_table/nav_v1_disc_SCR/seed=100/checkpoints/ckpt.10.pth"
+    TIMEOUT: 500
+    END_TYPE: "call_stop"
+
+  PickDrRLSkill:
+    TYPE: PickRLSkill
+    ACTION: BaseArmGripperAction2
+    CKPT_PATH: "data/results/rearrange/skills/set_table/pick_v1_drawer_joint_SCR/seed=100/checkpoints/ckpt.10.pth"
+    TIMEOUT: 200
+    END_TYPE: "obs"
+    THRESHOLD: 0.05
+
+  PlaceRLSkill:
+    TYPE: PlaceRLSkill
+    ACTION: BaseArmGripperAction2
+    CKPT_PATH: "data/results/rearrange/skills/tidy_house/place_v1_joint_SCR/seed=100/checkpoints/ckpt.10.pth"
+    TIMEOUT: 200
+    END_TYPE: "obs"
+    THRESHOLD: 0.05
+
+  OpenDrawerRLSkill:
+    TYPE: SetMarkerRLSkill
+    ACTION: BaseArmGripperAction2
+    CKPT_PATH: "data/results/rearrange/skills/set_table/open_drawer_v0A_joint_SCR/seed=100/checkpoints/ckpt.10.pth"
+    TIMEOUT: 200
+    THRESHOLD: 0.15
+
+  CloseDrawerRLSkill:
+    TYPE: SetMarkerRLSkill
+    ACTION: BaseArmGripperAction2
+    CKPT_PATH: "data/results/rearrange/skills/set_table/close_drawer_v0A_joint_SCR/seed=100/checkpoints/ckpt.10.pth"
+    TIMEOUT: 200
+    THRESHOLD: 0.15
+
+  PickFrRLSkill:
+    TYPE: PickRLSkill
+    ACTION: BaseArmGripperAction2
+    CKPT_PATH: "data/results/rearrange/skills/prepare_groceries/pick_v1_joint_SCR/seed=100/checkpoints/ckpt.10.pth"
+    TIMEOUT: 200
+    END_TYPE: "obs"
+    THRESHOLD: 0.05
+
+  OpenFridgeRLSkill:
+    TYPE: SetMarkerRLSkill
+    ACTION: BaseArmGripperAction2
+    CKPT_PATH: "data/results/rearrange/skills/set_table/open_fridge_v0A_joint_SCR/seed=100/checkpoints/ckpt.10.pth"
+    TIMEOUT: 200
+    THRESHOLD: 0.15
+
+  CloseFridgeRLSkill:
+    TYPE: SetMarkerRLSkill
+    ACTION: BaseArmGripperAction2
+    CKPT_PATH: "data/results/rearrange/skills/set_table/close_fridge_v0A_joint_SCR/seed=100/checkpoints/ckpt.10.pth"
+    TIMEOUT: 200
+    THRESHOLD: 0.15

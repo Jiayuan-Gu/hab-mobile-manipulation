@@ -1,0 +1,75 @@
+__BASE__: "{fileDirname}/base.yaml"
+
+ENVIRONMENT:
+  MAX_EPISODE_STEPS: 200
+
+TASK:
+  TYPE: RearrangePickTask-v0
+  BASE_NOISE: 0.1
+  BASE_ANGLE_NOISE: 0.25
+  
+  FRIDGE_INIT_RANGE: [1.5, 2.35]
+  DRAWER_INIT_RANGE: [0.4, 0.5]
+  OBJ_INIT_NOISE: 1.0
+  USE_CACHE: False
+
+  POSSIBLE_ACTIONS:
+    - ArmGripperAction
+    - ArmGripperAction2
+  ACTIONS:
+    ArmGripperAction:
+      GRIPPER_ACTION:
+        DISABLE_RELEASE: True
+    ArmGripperAction2:
+      GRIPPER_ACTION:
+        DISABLE_RELEASE: True
+
+  SENSORS:
+    - ArmJointPositionSensor
+    - GripperPositionSensor
+    - IsGraspedSensor
+    - PickGoalSensor
+    - PickGoalSensor2
+
+  MEASUREMENTS:
+    - GripperToObjectDistance
+    - GripperToRestingDistance
+    - GripperStatus
+    - RobotForce
+    - ForcePenalty
+    - InvalidGraspPenalty
+    - RearrangePickSuccess
+    - RearrangePickReward
+    
+  GripperToObjectDistance:
+    TYPE: GripperToObjectDistance
+  GripperToRestingDistance:
+    TYPE: GripperToRestingDistance
+  GripperStatus:
+    TYPE: GripperStatus
+  RobotForce:
+    TYPE: RobotForce
+    MIN_DELTA_FORCE: 20.0
+    INCLUDE_OBJ_COLLISIONS: True
+  ForcePenalty:
+    TYPE: ForcePenalty
+    FORCE_PENALTY: 0.001
+    MAX_FORCE_PENALTY: 0.2
+    MAX_ACCUM_FORCE: 5000.0
+    MAX_ACCUM_FORCE_PENALTY: 1.0
+  InvalidGrasp:
+    TYPE: InvalidGrasp
+  InvalidGraspPenalty:
+    TYPE: InvalidGraspPenalty
+    PENALTY: 1.0
+    END_EPISODE: True
+  RearrangePickSuccess:
+    TYPE: RearrangePickSuccess
+    THRESHOLD: 0.05
+  RearrangePickReward:
+    TYPE: RearrangePickReward
+    DIST_REWARD: 4.0
+    USE_DIFF: True
+    PICK_REWARD: 1.0
+    PICK_PENALTY: 1.0
+    DROP_PENALTY: 1.0

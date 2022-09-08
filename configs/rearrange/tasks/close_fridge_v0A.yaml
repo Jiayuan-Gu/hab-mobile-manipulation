@@ -1,0 +1,7 @@
+__BASE__: "{fileDirname}/open_fridge_v0A.yaml"
+
+TASK:
+  TYPE: RearrangeCloseFridgeTask-v0
+
+  MarkerToGoalDistance:
+    USE_ABS: True

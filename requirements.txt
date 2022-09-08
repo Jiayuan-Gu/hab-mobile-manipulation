@@ -1,0 +1,9 @@
+# habitat_baselines requirements
+lmdb>=0.98
+webdataset==0.1.40
+ifcfg
+moviepy>=1.0.1
+torch==1.5.1
+tensorboard
+protobuf==3.20.1
+pybullet==3.0.4

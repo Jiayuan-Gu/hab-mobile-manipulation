@@ -1,0 +1,10 @@
+__BASE__: "{fileDirname}/mr.yaml"
+
+SOLUTION:
+  PickAndPlace:
+    NavRLSkill:
+      TYPE: NavRLSkill
+      ACTION: BaseDiscVelAction
+      CKPT_PATH: "data/results/rearrange/skills/prepare_groceries/nav_v0_disc_SCR/seed=100/checkpoints/ckpt.10.pth"
+      TIMEOUT: 500
+      END_TYPE: "call_stop"

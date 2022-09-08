@@ -1,0 +1,5 @@
+__BASE__: "{fileDirname}/pick_v0_drawer_joint_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/pick_v1.yaml"
+
+RL:
+  ACTION_NAME: "BaseArmGripperAction2"

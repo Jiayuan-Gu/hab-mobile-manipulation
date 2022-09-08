@@ -1,0 +1,41 @@
+__BASE__: "{fileDirname}/base.yaml"
+
+ENVIRONMENT:
+  MAX_EPISODE_STEPS: 500
+
+TASK:
+  TYPE: RearrangeNavTask-v0
+  SUB_TASKS:
+    - "pick"
+    - "place"
+
+  # For pick/place initialization
+  FRIDGE_INIT_RANGE: [1.5, 2.35]
+  DRAWER_INIT_RANGE: [0.4, 0.5]
+
+  POSSIBLE_ACTIONS:
+    - BaseVelAction
+    - BaseDiscVelAction
+    - BaseVelAction2
+
+  SENSORS:
+    - NavGoalSensor
+
+  MEASUREMENTS:
+    - GeoDistanceToNavGoal
+    - AngDistanceToNavGoal
+    - RearrangeNavSuccess
+    - RearrangeNavReward
+  GeoDistanceToNavGoal:
+    TYPE: GeoDistanceToNavGoal
+  AngDistanceToNavGoal:
+    TYPE: AngDistanceToNavGoal
+  RearrangeNavSuccess:
+    TYPE: RearrangeNavSuccess
+    GEO_THRESHOLD: 0.3
+    ANG_THRESHOLD: 0.5
+  RearrangeNavReward:
+    TYPE: RearrangeNavReward
+    GEO_DIST_REWARD: 1.0
+    ANG_DIST_REWARD: 0.25
+    ANG_REWARD_THRESH: 0.5

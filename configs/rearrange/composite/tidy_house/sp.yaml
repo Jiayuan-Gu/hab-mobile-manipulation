@@ -1,0 +1,26 @@
+__BASE__: "{fileDirname}/base.yaml"
+
+SOLUTION:
+  PickAndPlace:
+    PickRLSkill:
+      TYPE: PickRLSkill
+      ACTION: ArmGripperAction2
+      CKPT_PATH: "data/results/rearrange/skills/tidy_house/pick_v0_joint_SCR/seed=100/checkpoints/ckpt.10.pth"
+      TIMEOUT: 200
+      END_TYPE: "obs"
+      THRESHOLD: 0.05
+
+    PlaceRLSkill:
+      TYPE: PlaceRLSkill
+      ACTION: ArmGripperAction2
+      CKPT_PATH: "data/results/rearrange/skills/tidy_house/place_v0_joint_SCR/seed=100/checkpoints/ckpt.10.pth"
+      TIMEOUT: 200
+      END_TYPE: "obs"
+      THRESHOLD: 0.05
+
+    NavRLSkill:
+      TYPE: NavRLSkill
+      ACTION: BaseDiscVelAction
+      CKPT_PATH: "data/results/rearrange/skills/tidy_house/nav_v0_disc_SCR/seed=100/checkpoints/ckpt.10.pth"
+      TIMEOUT: 500
+      END_TYPE: "call_stop"

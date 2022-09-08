@@ -1,0 +1,6 @@
+{
+    "render_asset": "transform_box.glb",
+    "collision_asset": "cubeSolid",
+    "collision_asset_size":[1.0, 1.0, 1.0],
+    "requires_lighting": true
+}

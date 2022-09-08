@@ -1,0 +1,12 @@
+{
+    "exclude": [
+        "**/__pycache__",
+        "data",
+        "habitat-sim",
+        "habitat-lab",
+        "venv",
+        "**/archive",
+        "mobile_manipulation/ppo",
+        "dev"
+    ],
+}

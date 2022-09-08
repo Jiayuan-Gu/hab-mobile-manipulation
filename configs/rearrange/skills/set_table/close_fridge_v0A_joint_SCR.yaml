@@ -1,0 +1,2 @@
+__BASE__: "{fileDirname}/open_fridge_v0A_joint_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/close_fridge_v0A.yaml"

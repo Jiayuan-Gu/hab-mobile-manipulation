@@ -1,0 +1,64 @@
+__BASE__: "{fileDirname}/../__base__.py"
+BASE_RUN_DIR: "data/results/rearrange/composite/set_table/{fileName}"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/composite/set_table.yaml"
+
+RL:
+  SUCCESS_MEASURE: "stage_success.close_1"
+  END_ON_SUCCESS: False
+
+SOLUTION:
+  SKILLS:
+    - NavRLSkill
+    - PickDrRLSkill
+    - PickFrRLSkill
+    - PlaceRLSkill
+    - OpenDrawerRLSkill
+    - CloseDrawerRLSkill
+    - OpenFridgeRLSkill
+    - CloseFridgeRLSkill
+    - ResetArm
+    - NextTarget
+
+  SKILL_SEQUENCE:
+    # drawer
+    - NavRLSkill
+    - ResetArm
+    - OpenDrawerRLSkill
+    - ResetArm
+    - PickDrRLSkill
+    - ResetArm
+    - NavRLSkill
+    - ResetArm
+    - PlaceRLSkill
+    - ResetArm
+    - NavRLSkill
+    - ResetArm
+    - CloseDrawerRLSkill
+    - ResetArm
+
+    - NextTarget
+
+    # fridge
+    - NavRLSkill
+    - ResetArm
+    - OpenFridgeRLSkill
+    - ResetArm
+    - NavRLSkill
+    - ResetArm
+    - PickFrRLSkill
+    - ResetArm
+    - NavRLSkill
+    - ResetArm
+    - PlaceRLSkill
+    - ResetArm
+    - NavRLSkill
+    - ResetArm
+    - CloseFridgeRLSkill
+    - ResetArm
+
+  ResetArm:
+    TYPE: ResetArm
+    TIMEOUT: 50
+
+  NextTarget:
+    TYPE: NextTarget

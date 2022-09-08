@@ -1,0 +1,36 @@
+# compilation and distribution
+__pycache__
+_ext
+*.pyc
+*.so
+build/
+dist/
+*.egg-info/
+
+# ipython/jupyter notebooks
+#*.ipynb
+**/.ipynb_checkpoints/
+
+# Editor temporaries
+*.swn
+*.swo
+*.swp
+*~
+
+# Pycharm editor settings
+.idea
+
+# VSCode editor settings
+.vscode
+
+# imgui settings
+imgui.ini
+
+# Virtual environment
+/venv
+
+# MacOS
+.DS_Store
+
+# Project
+/data

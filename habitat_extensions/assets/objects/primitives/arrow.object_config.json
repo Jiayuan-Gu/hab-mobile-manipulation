@@ -1,0 +1,5 @@
+{
+    "render_asset": "arrow.glb",
+    "COM" : [0.0, 0.0, 0.0],
+    "requires_lighting": true
+}

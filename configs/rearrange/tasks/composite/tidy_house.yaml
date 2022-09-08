@@ -1,0 +1,110 @@
+__BASE__: "{fileDirname}/../base.yaml"
+
+DATASET:
+  DATA_PATH: "data/datasets/rearrange/v3/tidy_house_220417_{split}.json.gz"
+
+ENVIRONMENT:
+  MAX_EPISODE_STEPS: 5000
+
+TASK:
+  TYPE: TidyHouseTask-v0
+  EE_NOISE: 0.0
+
+  POSSIBLE_ACTIONS:
+    - BaseArmGripperAction
+    - BaseArmGripperAction2
+    - ArmGripperAction
+    - ArmGripperAction2
+    - BaseVelAction
+    - BaseVelAction2
+    - BaseDiscVelAction
+    - EmptyAction
+
+  ACTIONS:
+    BaseDiscVelAction:
+      TYPE: BaseDiscVelAction
+      END_ON_STOP: False
+    BaseVelAction2:
+      TYPE: BaseVelStopAction
+      END_ON_STOP: False
+
+  SENSORS:
+    - RestingPositionSensor
+    # nav
+    - NavGoalSensor
+    # manip
+    - ArmJointPositionSensor
+    - GripperPositionSensor
+    - IsGraspedSensor
+    # pick
+    - PickGoalSensor
+    - PickGoalSensor2
+    # place
+    - PlaceGoalSensor
+    - PlaceGoalSensor2
+
+  MEASUREMENTS:
+    # general
+    - GripperStatus
+    - RobotForce
+    - InvalidGrasp
+    # composite
+    - StageSuccess
+
+  GripperStatus:
+    TYPE: GripperStatus
+  RobotForce:
+    TYPE: RobotForce
+    MIN_DELTA_FORCE: 20.0
+    INCLUDE_OBJ_COLLISIONS: True
+  InvalidGrasp:
+    TYPE: InvalidGrasp
+
+  StageSuccess:
+    TYPE: StageSuccess
+    GOALS:
+      pick_0:
+        - "holding(target_obj|0)"
+      place_0:
+        - "not_holding()"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+      pick_1:
+        - "holding(target_obj|1)"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+      place_1:
+        - "not_holding()"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "at(target_obj_pos|1,target_goal_pos|1)"
+      pick_2:
+        - "holding(target_obj|2)"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "at(target_obj_pos|1,target_goal_pos|1)"
+      place_2:
+        - "not_holding()"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "at(target_obj_pos|1,target_goal_pos|1)"
+        - "at(target_obj_pos|2,target_goal_pos|2)"
+      pick_3:
+        - "holding(target_obj|3)"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "at(target_obj_pos|1,target_goal_pos|1)"
+        - "at(target_obj_pos|2,target_goal_pos|2)"
+      place_3:
+        - "not_holding()"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "at(target_obj_pos|1,target_goal_pos|1)"
+        - "at(target_obj_pos|2,target_goal_pos|2)"
+        - "at(target_obj_pos|3,target_goal_pos|3)"
+      pick_4:
+        - "holding(target_obj|4)"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "at(target_obj_pos|1,target_goal_pos|1)"
+        - "at(target_obj_pos|2,target_goal_pos|2)"
+        - "at(target_obj_pos|3,target_goal_pos|3)"
+      place_4:
+        - "not_holding()"
+        - "at(target_obj_pos|0,target_goal_pos|0)"
+        - "at(target_obj_pos|1,target_goal_pos|1)"
+        - "at(target_obj_pos|2,target_goal_pos|2)"
+        - "at(target_obj_pos|3,target_goal_pos|3)"
+        - "at(target_obj_pos|4,target_goal_pos|4)"

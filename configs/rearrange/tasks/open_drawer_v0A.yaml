@@ -1,0 +1,38 @@
+__BASE__: "{fileDirname}/open_drawer_v0.yaml"
+
+TASK:
+  SPAWN_REGION: [[0.3, -0.6], [1.5, 0.6]]
+
+  POSSIBLE_ACTIONS:
+    - BaseArmGripperAction
+    - BaseArmGripperAction2
+
+  MEASUREMENTS:
+    - GripperToMarkerDistance
+    - GripperToRestingDistance
+    - MarkerToGoalDistance
+    - SetMarkerSuccess
+    - RearrangeSetSuccess
+    - GripperStatus
+    - InvalidGraspPenalty
+    - RearrangeSetMarkerReward
+    - InRegion
+    - OutOfRegionPenalty
+    - BaseActionPenalty
+
+  RearrangeSetMarkerReward:
+    TYPE: RearrangeSetMarkerRewardV1
+    MAX_QVEL: 0.1
+  InRegion:
+    TYPE: InRegion
+    ALLOWED_REGION: [[0.0, -1.5], [2.0, 1.5]]
+    REF_ART_OBJ: "@marker"
+  OutOfRegionPenalty:
+    TYPE: OutOfRegionPenalty
+    PENALTY: 1.0
+    END_EPISODE: True
+  BaseActionPenalty:
+    TYPE: ActionPenalty
+    UUID: "base_action_penalty"
+    SUB_ACTION: base_action
+    PENALTY: 0.008

@@ -1,0 +1,11 @@
+__BASE__: "{fileDirname}/base.yaml"
+
+ENVIRONMENT:
+  MAX_EPISODE_STEPS: 0
+
+TASK:
+  TYPE: RearrangeTask-v0
+
+  POSSIBLE_ACTIONS:
+    - BaseArmGripperAction
+    - EmptyAction

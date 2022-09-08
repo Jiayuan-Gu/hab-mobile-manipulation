@@ -1,0 +1,60 @@
+---
+dataset_path: "data/replica_cad/replicaCAD.scene_dataset_config.json"
+additional_object_paths:
+  - "data/objects/ycb/"
+
+object_sets:
+  - name: "hab2"
+    included_substrings:
+      - "002_master_chef_can"
+      - "003_cracker_box"
+      - "004_sugar_box"
+      - "005_tomato_soup_can"
+      - "007_tuna_fish_can"
+      - "008_pudding_box"
+      - "009_gelatin_box"
+      - "010_potted_meat_can"
+      - "024_bowl"
+    excluded_substrings: []
+receptacle_sets:
+  - name: "hab2"
+    included_object_substrings:
+      - ""
+    excluded_object_substrings: []
+    included_receptacle_substrings:
+      - "receptacle_aabb_Chr1_Top1_frl_apartment_chair_01"
+      - "receptacle_aabb_Tbl1_Top1_frl_apartment_table_01"
+      - "receptacle_aabb_Tbl2_Top1_frl_apartment_table_02"
+      - "receptacle_aabb_TvStnd1_Top1_frl_apartment_tvstand"
+      # - "receptacle_aabb_sink_kitchen_counter"
+      - "receptacle_aabb_counter_right_kitchen_counter"
+      - "receptacle_aabb_counter_left_kitchen_counter"
+      - "receptacle_aabb_Sofa_frl_apartment_sofa"
+
+    excluded_receptacle_substrings: []
+
+scene_sampler:
+  type: "single"
+  params:
+    scene: "v3_sc0_staging_00"
+
+object_samplers:
+  - name: "any_targets"
+    type: "uniform"
+    params:
+      object_sets: ["hab2"]
+      receptacle_sets: ["hab2"]
+      # num_samples: [30, 30]
+      num_samples: [25, 25]
+      orientation_sampling: "up"
+
+object_target_samplers:
+  - name: "any_targets"
+    type: "uniform"
+    params:
+      object_samplers: ["any_targets"]
+      receptacle_sets: ["hab2"]
+      num_samples: [5, 5]
+      orientation_sampling: "up"
+
+markers: []
