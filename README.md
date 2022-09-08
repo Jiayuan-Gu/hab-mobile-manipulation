@@ -1,5 +1,15 @@
 # Mobile Manipulation for the Home Assistant Benchmark (HAB)
 
+This is a PyTorch implementation of:
+
+[Multi-skill Mobile Manipulation for Object Rearrangement](https://arxiv.org/abs/2209.02778)<br/>
+Jiayuan Gu, Devendra Singh Chaplot, Hao Su, Jitendra Malik<br/>
+UC San Diego, Meta AI Research, UC Berkeley
+
+Project website: <https://sites.google.com/view/hab-m3>
+
+**Table of Contents**
+
 - [Installation](#installation)
 - [Data](#data)
 - [Interactive play](#interactive-play)
