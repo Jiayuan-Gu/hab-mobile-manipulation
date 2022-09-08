@@ -8,6 +8,11 @@ UC San Diego, Meta AI Research, UC Berkeley
 
 Project website: <https://sites.google.com/view/hab-m3>
 
+
+https://user-images.githubusercontent.com/17827258/189198353-9733887a-f7ad-4efc-a927-0b6d86f8d7b0.mp4
+
+
+
 **Table of Contents**
 
 - [Installation](#installation)
