@@ -15,6 +15,7 @@ from habitat_extensions.utils.visualizations.utils import (
 
 # isort: off
 from .sim import RearrangeSim
+from .sim_v1 import RearrangeSimV1
 from .task import RearrangeTask
 from . import actions, sensors
 from . import sub_tasks, composite_tasks, composite_sensors

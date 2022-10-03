@@ -1,0 +1,58 @@
+__BASE__: "{fileDirname}/../base.yaml"
+
+SIMULATOR:
+  TYPE: RearrangeSim-v1
+
+  HABITAT_SIM_V0:
+    ALLOW_SLIDING: false # CAUTION
+    ENABLE_PHYSICS: true
+    GPU_DEVICE_ID: 0
+    GPU_GPU: false
+    PHYSICS_CONFIG_FILE: ./data/default.physics_config.json
+  ADDITIONAL_OBJECT_PATHS:
+    - "data/objects/ycb/configs/"
+
+  AGENT_0:
+    SENSORS:
+      - "HEAD_RGB_SENSOR"
+      - "HEAD_DEPTH_SENSOR"
+      - "THIRD_RGB_SENSOR"
+    ROBOT_URDF: ./data/robots/hab_fetch/robots/hab_suction.urdf
+    ROBOT_TYPE: FetchSuctionRobot
+    IK_ARM_URDF: ./data/robots/hab_fetch/robots/fetch_onlyarm.urdf
+
+  HEAD_RGB_SENSOR:
+    WIDTH: 256
+    HEIGHT: 256
+  HEAD_DEPTH_SENSOR:
+    WIDTH: 256
+    HEIGHT: 256
+    MIN_DEPTH: 0.0
+    MAX_DEPTH: 10.0
+    NORMALIZE_DEPTH: true
+
+  CONCUR_RENDER: true # CAUTION
+  AUTO_SLEEP: true # CAUTION
+  KINEMATIC_MODE: false
+
+  # Rearrange Agent Grasping
+  HOLD_THRESH: 0.2
+  GRASP_IMPULSE: 10000.0
+
+TASK:
+  ACTIONS:
+    ArmGripperAction:
+      GRIPPER_ACTION:
+        TYPE: SuctionGraspAction
+        THRESHOLD: 0.15
+    BaseArmGripperAction:
+      GRIPPER_ACTION:
+        TYPE: SuctionGraspAction
+        THRESHOLD: 0.15
+
+DATASET:
+  TYPE: RearrangeDataset-v0
+  SPLIT: "minival"
+  DATA_PATH: "data/datasets/replica_cad/rearrange/v1/{split}/rearrange_easy.json.gz"
+  EPISODE_IDS: []
+  NUM_EPISODES: -1

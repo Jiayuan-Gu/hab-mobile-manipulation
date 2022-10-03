@@ -14,7 +14,7 @@ import torch
 from habitat.config import Config
 from habitat_baselines.common.baseline_registry import baseline_registry
 
-import habitat_extensions.tasks.rearrange
+import habitat_extensions.tasks.rearrange.env
 import mobile_manipulation.ppo
 from mobile_manipulation.config import get_config
 from mobile_manipulation.utils.common import get_run_name, warn

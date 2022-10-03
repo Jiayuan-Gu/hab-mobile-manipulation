@@ -11,7 +11,7 @@ from habitat import Config, logger
 from habitat_baselines.utils.common import batch_obs, generate_video
 
 import mobile_manipulation.methods.skills
-from habitat_extensions.tasks.rearrange import RearrangeRLEnv
+from habitat_extensions.tasks.rearrange.env import RearrangeRLEnv
 from habitat_extensions.tasks.rearrange.play import get_action_from_key
 from habitat_extensions.utils.viewer import OpenCVViewer
 from habitat_extensions.utils.visualizations.utils import put_info_on_image

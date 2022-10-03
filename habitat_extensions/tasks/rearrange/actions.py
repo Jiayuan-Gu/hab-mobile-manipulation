@@ -8,7 +8,10 @@ from habitat.core.embodied_task import SimulatorTaskAction
 from habitat.core.registry import registry
 from habitat.core.simulator import Observations
 
+from habitat_extensions.utils import coll_utils
+
 from .sim import RearrangeSim
+from .sim_v1 import RearrangeSimV1
 from .task import RearrangeTask
 
 
@@ -113,6 +116,72 @@ class MagicGraspAction(AtomicAction):
             self._sim.robot.open_gripper()
         elif gripper_action < 0.0:
             self._sim.robot.close_gripper()
+        is_grasped = self._sim.gripper.is_grasped
+        if (
+            gripper_action > 0.0
+            and not is_grasped
+            and (not self._config.get("DISABLE_GRASP", False))
+        ):
+            self._grasp()
+        elif (
+            gripper_action < 0.0
+            and is_grasped
+            and (not self._config.get("DISABLE_RELEASE", False))
+        ):
+            self._sim.gripper.desnap()
+
+
+@registry.register_task_action
+class SuctionGraspAction(AtomicAction):
+    _sim: RearrangeSimV1
+
+    def reset(self, *args, **kwargs) -> None:
+        super().reset(*args, **kwargs)
+        self._scene_obj_ids = [
+            x.object_id for x in self._sim.rigid_objs.values()
+        ]
+
+    @property
+    def action_space(self):
+        return spaces.Box(shape=(1,), low=-1, high=1, dtype=np.float32)
+
+    def _grasp(self):
+        robot_id = self._sim.robot.object_id
+        contact_points = self._sim.get_physics_contact_points()
+        gripper_link_ids = self._sim.robot.params.gripper_joints
+
+        # NOTE(jigu): I suspect there might be fake contacts (force = 0)
+        contact_infos = coll_utils.get_contact_infos(
+            contact_points, robot_id, link_ids=gripper_link_ids
+        )
+        if len(contact_infos) == 0:
+            return
+
+        # First, check rigid objects
+        for obj_id in self._scene_obj_ids:
+            for c in contact_infos:
+                if c["object_id"] == obj_id:
+                    ee_T = self._sim.robot.ee_T
+                    rom = self._sim.get_rigid_object_manager()
+                    obj = rom.get_object_by_id(obj_id)
+                    rel_pos = ee_T.inverted().transform_point(obj.translation)
+                    self._sim.gripper.snap_to_obj(
+                        obj_id, force=False, rel_pos=rel_pos
+                    )
+                    return
+
+        # Next, check markers
+        markers = self._sim.markers
+        for marker_uuid, marker in markers.items():
+            for c in contact_infos:
+                if (
+                    c["object_id"] == marker.art_obj.object_id
+                    and c["object_link_id"] == marker.link_id
+                ):
+                    self._sim.gripper.snap_to_marker(marker_uuid)
+                    return
+
+    def _step(self, gripper_action, *args, **kwargs):
         is_grasped = self._sim.gripper.is_grasped
         if (
             gripper_action > 0.0

@@ -494,7 +494,7 @@ class PPOTrainerV0(BaseTrainer):
         self.envs = construct_envs(
             config,
             get_env_class(config.ENV_NAME),
-            split_dataset=config.get("SPLIT_DATASET", True),
+            split_dataset=config.get("SPLIT_DATASET", False),
             workers_ignore_signals=False,
             auto_reset_done=auto_reset_done,
             wrappers=[HabitatActionWrapper],

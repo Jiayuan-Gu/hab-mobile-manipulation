@@ -32,6 +32,7 @@ class RearrangeEpisode(Episode):
     markers: List[Dict]
     target_receptacles: List[Tuple[str, int]]
     goal_receptacles: List[Tuple[str, int]]
+    name_to_receptacle: Dict[str, str] = attr.ib(factory=dict)
 
     # path to the SceneDataset config file
     scene_dataset_config: str = attr.ib(
@@ -152,11 +153,16 @@ class RearrangeTask(EmbodiedTask):
         self._sim.internal_step_by_time(0.1)
 
     def _get_start_ee_pos(self):
-        # NOTE(jigu): defined in pybullet link frame
-        start_ee_pos = np.array(
-            self._config.get("START_EE_POS", [0.5, 0.0, 1.0]),
-            dtype=np.float32,
+        # # NOTE(jigu): defined in pybullet link frame
+        # start_ee_pos = np.array(
+        #     self._config.get("START_EE_POS", [0.5, 0.0, 1.0]),
+        #     dtype=np.float32,
+        # )
+
+        self._sim.pyb_robot.set_joint_states(
+            self._sim.robot.params.arm_init_params
         )
+        start_ee_pos = self._sim.pyb_robot.ee_state[4]
 
         # The noise can not be too large (e.g. 0.05)
         ee_noise = self._config.get("EE_NOISE", 0.025)
@@ -165,7 +171,7 @@ class RearrangeTask(EmbodiedTask):
             noise = np.clip(noise, -ee_noise * 2, ee_noise * 2)
             start_ee_pos = start_ee_pos + noise
 
-        return start_ee_pos
+        return np.float32(start_ee_pos)
 
     def _initialize_ee_pos(self, start_ee_pos=None):
         """Initialize end-effector position."""

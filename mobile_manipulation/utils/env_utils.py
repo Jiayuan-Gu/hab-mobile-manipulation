@@ -9,23 +9,7 @@ from typing import List, Type, Union
 
 import gym
 from habitat import Config, Env, RLEnv, make_dataset
-from habitat.core.vector_env import RESET_COMMAND
-from habitat.core.vector_env import ThreadedVectorEnv as BaseThreadedVectorEnv
-from habitat.core.vector_env import VectorEnv as BaseVectorEnv
-
-
-class VectorEnv(BaseVectorEnv):
-    """Support async reset."""
-
-    def async_reset_at(self, index_env: int):
-        self._connection_write_fns[index_env]((RESET_COMMAND, None))
-
-    def wait_reset_at(self, index_env: int):
-        return self._connection_read_fns[index_env]()
-
-
-class ThreadedVectorEnv(BaseThreadedVectorEnv, VectorEnv):
-    pass
+from .vector_env import VectorEnv, ThreadedVectorEnv
 
 
 def make_env_fn(

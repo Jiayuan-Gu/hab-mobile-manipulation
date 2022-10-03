@@ -10,18 +10,18 @@ class Config(HabitatConfig):
         """Load a config from a Python source file."""
         module = _load_module_from_file("yacs.config.override", filename)
         _assert_with_logging(
-            hasattr(module, "cfg"),
-            "Python module from file {} must have 'cfg' attr".format(filename),
+            hasattr(module, "_C"),
+            "Python module from file {} must have '_C' attr".format(filename),
         )
         # NOTE(jigu): allow subclasses of valid types
         VALID_ATTR_TYPES = (dict, CfgNode)
         _assert_with_logging(
-            isinstance(module.cfg, VALID_ATTR_TYPES),
-            "Imported module 'cfg' attr must be in {} but is {} instead".format(
-                VALID_ATTR_TYPES, type(module.cfg)
+            isinstance(module._C, VALID_ATTR_TYPES),
+            "Imported module '_C' attr must be in {} but is {} instead".format(
+                VALID_ATTR_TYPES, type(module._C)
             ),
         )
-        return cls(module.cfg)
+        return cls(module._C)
 
 
 def load_config(config_path: str):
