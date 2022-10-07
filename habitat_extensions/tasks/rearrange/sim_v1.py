@@ -204,6 +204,9 @@ class MyRearrangeGraspManager(RearrangeGraspManager):
     def is_invalid_grasp(self, thresh=None):
         return self.is_violating_hold_constraint()
 
+    def update_object_to_grasp(self) -> None:
+        self.grasped_obj.transformation = self._managed_robot.ee_T
+
 
 @registry.register_simulator(name="RearrangeSim-v1")
 class RearrangeSimV1(HabitatSim):

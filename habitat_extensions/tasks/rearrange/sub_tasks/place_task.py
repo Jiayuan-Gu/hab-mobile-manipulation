@@ -3,7 +3,8 @@ import numpy as np
 from habitat import logger
 from habitat.core.registry import registry
 
-from habitat_extensions.utils import art_utils
+from habitat_extensions.utils import art_utils, obj_utils
+from scipy.spatial.transform import Rotation
 
 from ..task import RearrangeEpisode, RearrangeTask
 from ..task_utils import (
@@ -26,6 +27,15 @@ class RearrangePlaceTask(RearrangePickTask):
             tgt_indices = [self._config.TARGET_INDEX]
         else:
             tgt_indices = self.np_random.permutation(n_targets)
+
+        # Recompute due to articulation
+        _recompute_navmesh = False
+        for ao_state in episode.ao_states.values():
+            if any(x > 0.0 for x in ao_state.values()):
+                _recompute_navmesh = True
+                break
+        if _recompute_navmesh:
+            self._sim._recompute_navmesh()
 
         # ---------------------------------------------------------------------------- #
         # Sample a collision-free start state
@@ -78,10 +88,33 @@ class RearrangePlaceTask(RearrangePickTask):
                 )
             )
 
+        # Restore original navmesh
+        if _recompute_navmesh:
+            navmesh_path = episode.scene_id.replace(
+                "configs/scenes", "navmeshes"
+            )
+            navmesh_path = navmesh_path.replace(
+                "scene_instance.json", "navmesh"
+            )
+            self._sim.pathfinder.load_nav_mesh(navmesh_path)
+            self._sim._cache_largest_island()
+
         self._sim.robot.base_pos = start_state[0]
         self._sim.robot.base_ori = start_state[1]
-        self._sim.robot.open_gripper()
-        self._sim.gripper.snap_to_obj(self.tgt_obj)
+        # self._sim.robot.open_gripper()
+        # self._sim.gripper.snap_to_obj(self.tgt_obj)
+        aabb = obj_utils.get_aabb(self.tgt_obj)
+        aabb_size = np.array(aabb.size())
+        rel_pos = self.np_random.uniform(-aabb_size / 2, aabb_size / 2)
+        rel_rot = Rotation.random(random_state=self.np_random).as_matrix()
+        rel_T = mn.Matrix4.from_(mn.Matrix3(rel_rot), mn.Vector3(rel_pos))
+        self.tgt_obj.transformation = self._sim.robot.ee_T @ rel_T
+        self._sim.gripper.snap_to_obj(
+            self.tgt_obj.object_id,
+            force=False,
+            should_open_gripper=False,
+            rel_pos=rel_pos,
+        )
         self._sim.internal_step_by_time(0.1)
 
     def _set_target(self, index):
@@ -107,7 +140,7 @@ class RearrangePlaceTask(RearrangePickTask):
                     episode.episode_id, self.tgt_idx
                 )
             )
-            return None
+            # return None
 
         pos_noise = self._config.get("BASE_NOISE", 0.05)
         ori_noise = self._config.get("BASE_ANGLE_NOISE", 0.15)
@@ -138,7 +171,8 @@ class RearrangePlaceTask(RearrangePickTask):
                 self,
                 *start_state,
                 task_type="place",
-                max_ik_error=max_ik_error,
+                # max_ik_error=max_ik_error,
+                max_ik_error=None,
                 max_collision_force=0.0,
                 verbose=verbose,
             )

@@ -167,7 +167,8 @@ def check_start_state(
         ik_goal = task.pick_goal
     elif task_type == "place":
         sim.gripper.desnap(True)
-        sim.gripper.snap_to_obj(task.tgt_obj)
+        # sim.gripper.snap_to_obj(task.tgt_obj)
+        sim.gripper.snap_to_obj(task.tgt_obj.object_id)
         ik_goal = task.place_goal
     elif task_type == "nav":
         pass

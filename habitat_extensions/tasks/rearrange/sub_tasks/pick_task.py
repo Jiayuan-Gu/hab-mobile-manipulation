@@ -80,6 +80,7 @@ class RearrangePickTask(RearrangeTask):
         start_state = None  # (start_pos, start_ori)
         sim_state = self._sim.get_state()  # snapshot
 
+        # Recompute due to articulation
         _recompute_navmesh = False
         for ao_state in episode.ao_states.values():
             if any(x > 0.0 for x in ao_state.values()):

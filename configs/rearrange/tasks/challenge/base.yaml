@@ -49,12 +49,16 @@ TASK:
       GRIPPER_ACTION:
         TYPE: SuctionGraspAction
     ArmGripperAction2:
+      ARM_ACTION:
+        CTRL_SCALE: 0.0125
       GRIPPER_ACTION:
         TYPE: SuctionGraspAction
     BaseArmGripperAction:
       GRIPPER_ACTION:
         TYPE: SuctionGraspAction
     BaseArmGripperAction2:
+      ARM_ACTION:
+        CTRL_SCALE: 0.0125
       GRIPPER_ACTION:
         TYPE: SuctionGraspAction
 
