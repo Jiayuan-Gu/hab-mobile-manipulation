@@ -29,6 +29,10 @@ from habitat_sim.sim import SimulatorBackend
 from habitat_extensions.robots.marker import Marker
 from habitat_extensions.robots.pybullet_utils import PybulletRobot
 from habitat_extensions.utils import art_utils, coll_utils, mn_utils, obj_utils
+from habitat_extensions.utils.geo_utils import (
+    invert_transformation,
+    transform_points,
+)
 from habitat_extensions.utils.sim_utils import (
     get_navmesh_settings,
     get_object_handle_by_id,
@@ -36,6 +40,17 @@ from habitat_extensions.utils.sim_utils import (
 
 
 class MyFetchSuctionRobot(FetchSuctionRobot):
+    hab2pyb = mn.Matrix4(
+        np.float32(
+            [
+                [1, 0, 0, -0.0036],
+                [0, 0.0107961, -0.9999417, 0],
+                [0, 0.9999417, 0.0107961, 0.0014],
+                [0, 0, 0, 1],
+            ],
+        )
+    )
+
     def reset_arm(self):
         if self.params.arm_init_params is not None:
             self.arm_joint_pos = self.params.arm_init_params
@@ -43,6 +58,10 @@ class MyFetchSuctionRobot(FetchSuctionRobot):
         if self.params.gripper_init_params is not None:
             self.gripper_joint_pos = self.params.gripper_init_params
             self.gripper_motor_pos = self.params.gripper_init_params
+
+    @property
+    def object_id(self) -> int:
+        return self.sim_obj.object_id
 
     # ---------------------------------------------------------------------------- #
     # Base
@@ -87,19 +106,35 @@ class MyFetchSuctionRobot(FetchSuctionRobot):
 
     @property
     def gripper_T(self):
-        gripper_T = self.ee_T
-        gripper_T.translation = gripper_T.transform_point(
-            self.params.ee_offset
-        )
-        return gripper_T
+        # gripper_T = self.ee_T
+        # gripper_T.translation = gripper_T.transform_point(
+        #     self.params.ee_offset
+        # )
+        # return gripper_T
+        return self.ee_T
 
     @property
     def gripper_pos(self):
         return np.array(self.gripper_T.translation, dtype=np.float32)
 
-    @property
-    def object_id(self) -> int:
-        return self.sim_obj.object_id
+    def transform(self, x: np.ndarray, T: Union[str, np.ndarray]):
+        """Transform point(s) (from habitat world frame) to specified frame."""
+        if isinstance(T, str):
+            if T == "world2base":
+                T = np.array(self.base_T.inverted())
+            elif T == "world2pbase":
+                T = np.array(self.hab2pyb @ self.base_T.inverted())
+            elif T == "base2pbase":
+                T = np.array(self.hab2pyb)
+            elif T == "base2world":
+                T = np.array(self.base_T)
+            elif T == "pbase2base":
+                T = invert_transformation(self.hab2pyb)
+            else:
+                raise NotImplementedError(T)
+
+        assert T.shape == (4, 4)
+        return transform_points(x, T)
 
     # -------------------------------------------------------------------------- #
     # Get/set state
@@ -166,10 +201,14 @@ class MyRearrangeGraspManager(RearrangeGraspManager):
     def grasped_marker_id(self):
         return self._snapped_marker_id
 
+    def is_invalid_grasp(self, thresh=None):
+        return self.is_violating_hold_constraint()
+
 
 @registry.register_simulator(name="RearrangeSim-v1")
 class RearrangeSimV1(HabitatSim):
-    RIGID_OBJECT_DIR = "data/objects/ycb/configs"
+    # RIGID_OBJECT_DIR = "data/objects/ycb/configs"
+    RIGID_OBJECT_DIR = "data/objects/ycb"
     PRIMITIVE_DIR = "habitat_extensions/assets/objects/primitives"
 
     def __init__(self, config: Config):
@@ -247,8 +286,8 @@ class RearrangeSimV1(HabitatSim):
         self._prev_scene_dataset = habitat_config.SCENE_DATASET
 
         # Acquire GL context for async rendering
-        if self.habitat_config.CONCUR_RENDER:
-            self.renderer.acquire_gl_context()
+        # if self.habitat_config.CONCUR_RENDER:
+        #     self.renderer.acquire_gl_context()
 
         if not is_same_scene:
             self.art_objs = OrderedDict()
@@ -611,11 +650,11 @@ class RearrangeSimV1(HabitatSim):
         if action is not None:
             self._default_agent.act(action)
 
-        self.gripper.update()
-        self.robot.update()
-
         if self.habitat_config.CONCUR_RENDER:
-            self._prev_sim_obs = self.start_async_render()
+            self.gripper.update()
+            self.robot.update()
+            # self._prev_sim_obs = self.start_async_render()
+            self._prev_sim_obs = self.get_sensor_observations()
 
         # step physics
         for _ in range(self.habitat_config.CONTROL_FREQ):
@@ -626,7 +665,7 @@ class RearrangeSimV1(HabitatSim):
         self.sync_pyb_robot()
 
         if self.habitat_config.CONCUR_RENDER:
-            self._prev_sim_obs = self.get_sensor_observations_async_finish()
+            # self._prev_sim_obs = self.get_sensor_observations_async_finish()
             return self._sensor_suite.get_observations(self._prev_sim_obs)
 
         return self.get_observations()

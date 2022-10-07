@@ -68,18 +68,18 @@ def construct_envs(
     env_classes = [env_class] * num_envs
 
     # NOTE(jigu): One scene per process can maximize the simulation speed.
-    if split_dataset:
-        dataset = make_dataset(
-            config.TASK_CONFIG.DATASET.TYPE, config=config.TASK_CONFIG.DATASET
-        )
-        # print(len(dataset.scene_ids))
-        datasets = dataset.get_splits(
-            num_envs, sort_by_episode_id=True, allow_uneven_splits=True
-        )
-        episode_splits = [x.episode_ids for x in datasets]
-        # for dataset in datasets:
-        #     print(dataset.num_episodes)
-        #     print(dataset.scene_ids)
+    # if split_dataset:
+    #     dataset = make_dataset(
+    #         config.TASK_CONFIG.DATASET.TYPE, config=config.TASK_CONFIG.DATASET
+    #     )
+    #     # print(len(dataset.scene_ids))
+    #     datasets = dataset.get_splits(
+    #         num_envs, sort_by_episode_id=True, allow_uneven_splits=True
+    #     )
+    #     episode_splits = [x.episode_ids for x in datasets]
+    #     # for dataset in datasets:
+    #     #     print(dataset.num_episodes)
+    #     #     print(dataset.scene_ids)
 
     # Prepare the config for each environment
     for i in range(num_envs):
@@ -89,7 +89,8 @@ def construct_envs(
         task_config = proc_config.TASK_CONFIG
         task_config.SEED = task_config.SEED + i
         if split_dataset:
-            task_config.DATASET.EPISODE_IDS = episode_splits[i]
+            # task_config.DATASET.EPISODE_IDS = episode_splits[i]
+            task_config.DATASET.DATA_PATH = task_config.DATASET.DATA_PATH.replace("json", f"{i:02d}.json")
 
         # NOTE(jigu): overwrite here to avoid polluating config saved in ckpt
         # overwrite simulator config

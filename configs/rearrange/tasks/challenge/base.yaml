@@ -22,11 +22,15 @@ SIMULATOR:
     IK_ARM_URDF: ./data/robots/hab_fetch/robots/fetch_onlyarm.urdf
 
   HEAD_RGB_SENSOR:
-    WIDTH: 256
-    HEIGHT: 256
+    # WIDTH: 256
+    # HEIGHT: 256
+    WIDTH: 128
+    HEIGHT: 128
   HEAD_DEPTH_SENSOR:
-    WIDTH: 256
-    HEIGHT: 256
+    # WIDTH: 256
+    # HEIGHT: 256
+    WIDTH: 128
+    HEIGHT: 128
     MIN_DEPTH: 0.0
     MAX_DEPTH: 10.0
     NORMALIZE_DEPTH: true
@@ -44,11 +48,15 @@ TASK:
     ArmGripperAction:
       GRIPPER_ACTION:
         TYPE: SuctionGraspAction
-        THRESHOLD: 0.15
+    ArmGripperAction2:
+      GRIPPER_ACTION:
+        TYPE: SuctionGraspAction
     BaseArmGripperAction:
       GRIPPER_ACTION:
         TYPE: SuctionGraspAction
-        THRESHOLD: 0.15
+    BaseArmGripperAction2:
+      GRIPPER_ACTION:
+        TYPE: SuctionGraspAction
 
 DATASET:
   TYPE: RearrangeDataset-v0

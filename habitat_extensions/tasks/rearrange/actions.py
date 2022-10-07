@@ -166,7 +166,10 @@ class SuctionGraspAction(AtomicAction):
                     obj = rom.get_object_by_id(obj_id)
                     rel_pos = ee_T.inverted().transform_point(obj.translation)
                     self._sim.gripper.snap_to_obj(
-                        obj_id, force=False, rel_pos=rel_pos
+                        obj_id,
+                        force=False,
+                        rel_pos=rel_pos,
+                        should_open_gripper=False,
                     )
                     return
 

@@ -80,6 +80,14 @@ class RearrangePickTask(RearrangeTask):
         start_state = None  # (start_pos, start_ori)
         sim_state = self._sim.get_state()  # snapshot
 
+        _recompute_navmesh = False
+        for ao_state in episode.ao_states.values():
+            if any(x > 0.0 for x in ao_state.values()):
+                _recompute_navmesh = True
+                break
+        if _recompute_navmesh:
+            self._sim._recompute_navmesh()
+
         n_targets = len(self._sim.targets)
         if "TARGET_INDEX" in self._config:
             tgt_indices = [self._config.TARGET_INDEX]
@@ -141,6 +149,17 @@ class RearrangePickTask(RearrangeTask):
         self._sim.robot.base_ori = start_state[1]
         self._sim.internal_step_by_time(0.1)
 
+        # Restore original navmesh
+        if _recompute_navmesh:
+            navmesh_path = episode.scene_id.replace(
+                "configs/scenes", "navmeshes"
+            )
+            navmesh_path = navmesh_path.replace(
+                "scene_instance.json", "navmesh"
+            )
+            self._sim.pathfinder.load_nav_mesh(navmesh_path)
+            self._sim._cache_largest_island()
+
         # -------------------------------------------------------------------------- #
         # Sanity check
         # -------------------------------------------------------------------------- #
@@ -179,14 +198,14 @@ class RearrangePickTask(RearrangeTask):
 
             # print(art_utils.get_joints_info(self.tgt_receptacle))
 
-            init_range = self._config.get("FRIDGE_INIT_RANGE", [2.356, 2.356])
-            init_qpos = self.np_random.uniform(*init_range)
+            # init_range = self._config.get("FRIDGE_INIT_RANGE", [2.356, 2.356])
+            # init_qpos = self.np_random.uniform(*init_range)
 
-            max_qpos = self._get_max_fridge_state(episode.scene_id)
-            init_qpos = np.clip(init_qpos, None, max_qpos)
+            # max_qpos = self._get_max_fridge_state(episode.scene_id)
+            # init_qpos = np.clip(init_qpos, None, max_qpos)
 
             # Kinematic alternative to set link states
-            art_utils.set_joint_pos(self.tgt_receptacle, [1], [init_qpos])
+            # art_utils.set_joint_pos(self.tgt_receptacle, [1], [init_qpos])
 
             # Dynamic way to set link
             # self._sim.set_joint_pos_by_motor(
@@ -214,47 +233,47 @@ class RearrangePickTask(RearrangeTask):
             #     self.tgt_receptacle, receptacle_link_id, 0.5, dt=1.0
             # )
 
-            # Kinematic alternative to set link states
-            pos_offset = self.tgt_receptacle.get_link_joint_pos_offset(
-                receptacle_link_id
-            )
-            T1 = self.tgt_receptacle_link.transformation
-            art_utils.set_joint_pos(
-                self.tgt_receptacle, [pos_offset], [init_qpos]
-            )
-            T2 = self.tgt_receptacle_link.transformation
-            t = T2.translation - T1.translation
-            # Move object along with the drawer
-            # Assume a single object in the drawer
-            self.tgt_obj.translation = self.tgt_obj.translation + t
+            # # Kinematic alternative to set link states
+            # pos_offset = self.tgt_receptacle.get_link_joint_pos_offset(
+            #     receptacle_link_id
+            # )
+            # T1 = self.tgt_receptacle_link.transformation
+            # art_utils.set_joint_pos(
+            #     self.tgt_receptacle, [pos_offset], [init_qpos]
+            # )
+            # T2 = self.tgt_receptacle_link.transformation
+            # t = T2.translation - T1.translation
+            # # Move object along with the drawer
+            # # Assume a single object in the drawer
+            # self.tgt_obj.translation = self.tgt_obj.translation + t
             self.pick_goal2 = np.array(
                 self.tgt_obj.translation, dtype=np.float32
             )
 
-            # Generate some noise for obj in the drawer
-            obj_init_noise = self._config.get("OBJ_INIT_NOISE", 0.0)
+            # # Generate some noise for obj in the drawer
+            # obj_init_noise = self._config.get("OBJ_INIT_NOISE", 0.0)
 
-            if obj_init_noise > 0.0:
-                # Add noise to move direction
-                direction = t / np.linalg.norm(t)
-                speed = self.np_random.randn() * obj_init_noise
-                speed = np.clip(speed, -5.0, 5.0)
+            # if obj_init_noise > 0.0:
+            #     # Add noise to move direction
+            #     direction = t / np.linalg.norm(t)
+            #     speed = self.np_random.randn() * obj_init_noise
+            #     speed = np.clip(speed, -5.0, 5.0)
 
-                # Add noise to orthogonal direction
-                orth = mn.Matrix4.rotation_y(mn.Rad(np.pi / 2))
-                direction2 = orth.transform_vector(direction)
-                noise = self.np_random.randn() * obj_init_noise
-                noise = np.clip(noise, -5.0, 5.0)
-                self.tgt_obj.linear_velocity = (
-                    speed * direction + noise * direction2
-                )
-                t1 = self.tgt_obj.translation
-                # self._sim.internal_step_by_time(1.0)
-                self._sim.internal_step_by_time(0.6)
-                t2 = self.tgt_obj.translation
-                self._err_thresh += np.linalg.norm(t2 - t1)
-                # print("obj noise", t2 - t1)
-                # print(speed, self._err_thresh)
+            #     # Add noise to orthogonal direction
+            #     orth = mn.Matrix4.rotation_y(mn.Rad(np.pi / 2))
+            #     direction2 = orth.transform_vector(direction)
+            #     noise = self.np_random.randn() * obj_init_noise
+            #     noise = np.clip(noise, -5.0, 5.0)
+            #     self.tgt_obj.linear_velocity = (
+            #         speed * direction + noise * direction2
+            #     )
+            #     t1 = self.tgt_obj.translation
+            #     # self._sim.internal_step_by_time(1.0)
+            #     self._sim.internal_step_by_time(0.6)
+            #     t2 = self.tgt_obj.translation
+            #     self._err_thresh += np.linalg.norm(t2 - t1)
+            #     # print("obj noise", t2 - t1)
+            #     # print(speed, self._err_thresh)
 
             T = self.tgt_receptacle_link.transformation
             offset = mn.Vector3(0.8, 0, 0)
@@ -289,11 +308,11 @@ class RearrangePickTask(RearrangeTask):
         # Skip if not in the largest island
         if not self._sim.is_at_larget_island(start_pos):
             logger.warning(
-                "Episode {}: start_pos({}) is not at the largest island ".format(
+                "Episode {}: start_pos({}) is not at the largest island".format(
                     episode.episode_id, self.tgt_idx
                 )
             )
-            return None
+            # return None
 
         pos_noise = self._config.get("BASE_NOISE", 0.05)
         ori_noise = self._config.get("BASE_ANGLE_NOISE", 0.15)
@@ -326,7 +345,8 @@ class RearrangePickTask(RearrangeTask):
                 self,
                 *start_state,
                 task_type="pick",
-                max_ik_error=max_ik_error,
+                # max_ik_error=max_ik_error,
+                max_ik_error=None,
                 max_collision_force=0.0,
                 verbose=verbose,
             )

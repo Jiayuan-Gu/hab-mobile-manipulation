@@ -54,3 +54,6 @@ class Marker:
     @property
     def ao_parent(self):
         return self.art_obj
+
+    def get_current_position(self):
+        return self.pos
