@@ -81,13 +81,7 @@ class RearrangePickTask(RearrangeTask):
         sim_state = self._sim.get_state()  # snapshot
 
         # Recompute due to articulation
-        _recompute_navmesh = False
-        for ao_state in episode.ao_states.values():
-            if any(x > 0.0 for x in ao_state.values()):
-                _recompute_navmesh = True
-                break
-        if _recompute_navmesh:
-            self._sim._recompute_navmesh()
+        self._maybe_recompute_navmesh(episode)
 
         n_targets = len(self._sim.targets)
         if "TARGET_INDEX" in self._config:
@@ -146,20 +140,12 @@ class RearrangePickTask(RearrangeTask):
                 )
             )
 
+        # Restore original navmesh
+        self._maybe_restore_navmesh(episode)
+
         self._sim.robot.base_pos = start_state[0]
         self._sim.robot.base_ori = start_state[1]
         self._sim.internal_step_by_time(0.1)
-
-        # Restore original navmesh
-        if _recompute_navmesh:
-            navmesh_path = episode.scene_id.replace(
-                "configs/scenes", "navmeshes"
-            )
-            navmesh_path = navmesh_path.replace(
-                "scene_instance.json", "navmesh"
-            )
-            self._sim.pathfinder.load_nav_mesh(navmesh_path)
-            self._sim._cache_largest_island()
 
         # -------------------------------------------------------------------------- #
         # Sanity check

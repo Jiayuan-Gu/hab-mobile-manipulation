@@ -260,3 +260,25 @@ class RearrangeTask(EmbodiedTask):
 
     def _has_target_in_container(self):
         return self._has_target_in_drawer() or self._has_target_in_fridge()
+
+    # -------------------------------------------------------------------------- #
+    # Navmesh
+    # -------------------------------------------------------------------------- #
+    def _maybe_recompute_navmesh(self, episode: RearrangeEpisode):
+        _recompute_navmesh = False
+        for ao_state in episode.ao_states.values():
+            if any(x > 0.0 for x in ao_state.values()):
+                _recompute_navmesh = True
+                break
+        if _recompute_navmesh:
+            self._sim._recompute_navmesh()
+        self._recompute_navmesh = _recompute_navmesh
+
+    def _maybe_restore_navmesh(self, episode: RearrangeEpisode):
+        if not self._recompute_navmesh:
+            return
+        navmesh_path = episode.scene_id.replace("configs/scenes", "navmeshes")
+        navmesh_path = navmesh_path.replace("scene_instance.json", "navmesh")
+        self._sim.pathfinder.load_nav_mesh(navmesh_path)
+        self._sim._cache_largest_island()
+        self._recompute_navmesh = False

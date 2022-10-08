@@ -2,8 +2,9 @@ import magnum as mn
 import numpy as np
 from habitat import logger
 from habitat.core.registry import registry
+from scipy.spatial.transform import Rotation
 
-from habitat_extensions.utils import art_utils
+from habitat_extensions.utils import art_utils, obj_utils
 
 from ..task import RearrangeEpisode, RearrangeTask
 from ..task_utils import (
@@ -21,6 +22,10 @@ from ..task_utils import (
 @registry.register_task(name="RearrangeNavTask-v0")
 class RearrangeNavTask(RearrangeTask):
     sub_task: str
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._cache_init_start_pos = {}
 
     def initialize(self, episode: RearrangeEpisode):
         sim_state = self._sim.get_state()  # snapshot
@@ -85,8 +90,20 @@ class RearrangeNavTask(RearrangeTask):
         self._sim.robot.base_pos = start_state[0]
         self._sim.robot.base_ori = start_state[1]
         if self.sub_task == "place":
-            self._sim.robot.open_gripper()
-            self._sim.gripper.snap_to_obj(self.tgt_obj)
+            # self._sim.robot.open_gripper()
+            # self._sim.gripper.snap_to_obj(self.tgt_obj)
+            aabb = obj_utils.get_aabb(self.tgt_obj)
+            aabb_size = np.array(aabb.size())
+            rel_pos = self.np_random.uniform(-aabb_size / 2, aabb_size / 2)
+            rel_rot = Rotation.random(random_state=self.np_random).as_matrix()
+            rel_T = mn.Matrix4.from_(mn.Matrix3(rel_rot), mn.Vector3(rel_pos))
+            self.tgt_obj.transformation = self._sim.robot.ee_T @ rel_T
+            self._sim.gripper.snap_to_obj(
+                self.tgt_obj.object_id,
+                force=False,
+                should_open_gripper=False,
+                rel_pos=rel_pos,
+            )
         self._sim.internal_step_by_time(0.1)
 
     def _get_supported_tasks(self):
@@ -127,20 +144,20 @@ class RearrangeNavTask(RearrangeTask):
             )
 
             # Open the fridge
-            if self.sub_task in ["pick", "place", "close_fridge"]:
-                init_range = self._config.get(
-                    "FRIDGE_INIT_RANGE", [2.356, 2.356]
-                )
-                init_qpos = self.np_random.uniform(*init_range)
+            # if self.sub_task in ["pick", "place", "close_fridge"]:
+            #     init_range = self._config.get(
+            #         "FRIDGE_INIT_RANGE", [2.356, 2.356]
+            #     )
+            #     init_qpos = self.np_random.uniform(*init_range)
 
-                # Kinematic alternative to set link states
-                # art_utils.set_joint_pos(self.tgt_receptacle, [1], [init_qpos])
+            #     # Kinematic alternative to set link states
+            #     # art_utils.set_joint_pos(self.tgt_receptacle, [1], [init_qpos])
 
-                # Dynamic way to set link
-                self._sim.set_joint_pos_by_motor(
-                    self.tgt_receptacle, 2, init_qpos, dt=0.6
-                )
-                # print(init_qpos, self.tgt_receptacle.joint_positions)
+            #     # Dynamic way to set link
+            #     self._sim.set_joint_pos_by_motor(
+            #         self.tgt_receptacle, 2, init_qpos, dt=0.6
+            #     )
+            #     # print(init_qpos, self.tgt_receptacle.joint_positions)
 
             T = self.tgt_receptacle.transformation
             offset = mn.Vector3(1.0, 0, 0)
@@ -154,26 +171,26 @@ class RearrangeNavTask(RearrangeTask):
                 receptacle_link_id
             )
 
-            # Open the drawer
-            if self.sub_task in ["pick", "place", "close_drawer"]:
-                init_range = self._config.get("DRAWER_INIT_RANGE", [0.5, 0.5])
-                init_qpos = self.np_random.uniform(*init_range)
+            # # Open the drawer
+            # if self.sub_task in ["pick", "place", "close_drawer"]:
+            #     init_range = self._config.get("DRAWER_INIT_RANGE", [0.5, 0.5])
+            #     init_qpos = self.np_random.uniform(*init_range)
 
-                # Kinematic alternative to set link states
-                pos_offset = self.tgt_receptacle.get_link_joint_pos_offset(
-                    receptacle_link_id
-                )
-                T1 = self.tgt_receptacle_link.transformation
-                art_utils.set_joint_pos(
-                    self.tgt_receptacle, [pos_offset], [init_qpos]
-                )
-                T2 = self.tgt_receptacle_link.transformation
-                t = T2.translation - T1.translation
+            #     # Kinematic alternative to set link states
+            #     pos_offset = self.tgt_receptacle.get_link_joint_pos_offset(
+            #         receptacle_link_id
+            #     )
+            #     T1 = self.tgt_receptacle_link.transformation
+            #     art_utils.set_joint_pos(
+            #         self.tgt_receptacle, [pos_offset], [init_qpos]
+            #     )
+            #     T2 = self.tgt_receptacle_link.transformation
+            #     t = T2.translation - T1.translation
 
-                if self.sub_task == "close_drawer":
-                    self.tgt_obj.transformation = self.tgt_T
-                else:
-                    self.tgt_obj.translation = self.tgt_obj.translation + t
+            #     if self.sub_task == "close_drawer":
+            #         self.tgt_obj.transformation = self.tgt_T
+            #     else:
+            #         self.tgt_obj.translation = self.tgt_obj.translation + t
 
             T = self.tgt_receptacle_link.transformation
             offset = mn.Vector3(0.8, 0, 0)
@@ -196,10 +213,30 @@ class RearrangeNavTask(RearrangeTask):
         self.spawn_T = None
 
         if self.sub_task == "pick":
+            key = (episode.episode_id, 0)
+            if key in self._cache_init_start_pos:
+                self.init_start_pos = self._cache_init_start_pos[key]
+            elif self.init_start_pos is None:
+                self._maybe_recompute_navmesh(episode)
+                self.init_start_pos = self._sim.pathfinder.snap_point(
+                    self.pick_goal
+                )
+                self._cache_init_start_pos[key] = self.init_start_pos
+                self._maybe_restore_navmesh(episode)
             self.nav_goal = compute_start_state(
                 self._sim, self.pick_goal, init_start_pos=self.init_start_pos
             )
         elif self.sub_task == "place":
+            key = (episode.episode_id, 1)
+            if key in self._cache_init_start_pos:
+                self.init_start_pos = self._cache_init_start_pos[key]
+            elif self.init_start_pos is None:
+                self._maybe_recompute_navmesh(episode)
+                self.init_start_pos = self._sim.pathfinder.snap_point(
+                    self.place_goal
+                )
+                self._cache_init_start_pos[key] = self.init_start_pos
+                self._maybe_restore_navmesh(episode)
             self.nav_goal = compute_start_state(
                 self._sim, self.place_goal, init_start_pos=self.init_start_pos
             )
@@ -425,7 +462,7 @@ class RearrangeNavTaskV1(RearrangeNavTask):
                         debug=False,
                     )
 
-                # The drawer can have different initial states for one episode 
+                # The drawer can have different initial states for one episode
                 if not self._has_target_in_drawer():
                     self._set_cache_nav_goals(episode.episode_id)
 

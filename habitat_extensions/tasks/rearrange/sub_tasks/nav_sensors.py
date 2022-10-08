@@ -77,6 +77,8 @@ class GeoDistanceToNavGoal(MyMeasure):
         self._metric = self._sim.geodesic_distance(
             start, goal_pos, episode=episode
         )
+        if np.isinf(self._metric):
+            self._metric = 100.0
 
 
 @registry.register_measure

@@ -61,6 +61,12 @@ TASK:
         CTRL_SCALE: 0.0125
       GRIPPER_ACTION:
         TYPE: SuctionGraspAction
+    BaseVelAction:
+      LIN_SCALE: 2.5
+      ANG_SCALE: 2.5
+    BaseDiscVelAction:
+      LIN_SCALE: 2.5
+      ANG_SCALE: 2.5
 
 DATASET:
   TYPE: RearrangeDataset-v0

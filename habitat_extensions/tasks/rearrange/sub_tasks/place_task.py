@@ -2,9 +2,9 @@ import magnum as mn
 import numpy as np
 from habitat import logger
 from habitat.core.registry import registry
+from scipy.spatial.transform import Rotation
 
 from habitat_extensions.utils import art_utils, obj_utils
-from scipy.spatial.transform import Rotation
 
 from ..task import RearrangeEpisode, RearrangeTask
 from ..task_utils import (
@@ -29,13 +29,7 @@ class RearrangePlaceTask(RearrangePickTask):
             tgt_indices = self.np_random.permutation(n_targets)
 
         # Recompute due to articulation
-        _recompute_navmesh = False
-        for ao_state in episode.ao_states.values():
-            if any(x > 0.0 for x in ao_state.values()):
-                _recompute_navmesh = True
-                break
-        if _recompute_navmesh:
-            self._sim._recompute_navmesh()
+        self._maybe_recompute_navmesh(episode)
 
         # ---------------------------------------------------------------------------- #
         # Sample a collision-free start state
@@ -89,15 +83,7 @@ class RearrangePlaceTask(RearrangePickTask):
             )
 
         # Restore original navmesh
-        if _recompute_navmesh:
-            navmesh_path = episode.scene_id.replace(
-                "configs/scenes", "navmeshes"
-            )
-            navmesh_path = navmesh_path.replace(
-                "scene_instance.json", "navmesh"
-            )
-            self._sim.pathfinder.load_nav_mesh(navmesh_path)
-            self._sim._cache_largest_island()
+        self._maybe_restore_navmesh(episode)
 
         self._sim.robot.base_pos = start_state[0]
         self._sim.robot.base_ori = start_state[1]
