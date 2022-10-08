@@ -654,7 +654,8 @@ class PPOTrainerV0(BaseTrainer):
             os.makedirs(log_dir, exist_ok=True)
             logger.add_filehandler(self.config.LOG_FILE)
 
-        writer = TensorboardWriter(self.config.TENSORBOARD_DIR, flush_secs=30)
+        writer = TensorboardWriter("", flush_secs=30)
+        # writer = TensorboardWriter(self.config.TENSORBOARD_DIR, flush_secs=30)
 
         if self.config.EVAL.CKPT_PATH:
             ckpt_path = self.config.EVAL.CKPT_PATH
