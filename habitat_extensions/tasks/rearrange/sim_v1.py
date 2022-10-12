@@ -211,7 +211,7 @@ class MyRearrangeGraspManager(RearrangeGraspManager):
 @registry.register_simulator(name="RearrangeSim-v1")
 class RearrangeSimV1(HabitatSim):
     # RIGID_OBJECT_DIR = "data/objects/ycb/configs"
-    RIGID_OBJECT_DIR = "data/objects/ycb"
+    RIGID_OBJECT_DIR = "data/objects/ycb_1.1"
     PRIMITIVE_DIR = "habitat_extensions/assets/objects/primitives"
 
     def __init__(self, config: Config):

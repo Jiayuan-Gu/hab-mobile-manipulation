@@ -285,21 +285,21 @@
       <mass value="1.5175" />
       <inertia ixx="0.0013" ixy="-0.0" ixz="0.0" iyy="0.0019" iyz="-0.0" izz="0.0024" />
     </inertial>
-    <visual>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+    <!-- <visual>
+      <origin rpy="-1.56 0 1.56" xyz="0 0 0.05" />
       <geometry>
-        <mesh filename="../meshes/gripper_link.dae" />
+        <mesh filename="../meshes/suctionCup.glb" scale="0.28 0.28 0.28" />
       </geometry>
-    </visual>
+    </visual> -->
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="0 0 -0.06" />
       <geometry>
-        <mesh filename="../meshes/gripper_link_collision.obj" />
+        <box size="0.04 0.04 0.18" />
       </geometry>
     </collision>
   </link>
   <joint name="gripper_axis" type="fixed">
-    <origin rpy="0 0 0" xyz="0.16645 0 0" />
+    <origin rpy="0 1.56 0" xyz="0.16645 0 0" />
     <parent link="wrist_roll_link" />
     <child link="gripper_link" />
     <axis xyz="0 1 0" />
