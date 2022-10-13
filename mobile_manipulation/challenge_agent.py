@@ -1,8 +1,8 @@
 import argparse
 import os
 from typing import Dict
-import cv2
 
+import cv2
 import habitat
 import magnum as mn
 import numpy as np
@@ -11,10 +11,13 @@ from gym import spaces
 from habitat_baselines.common.baseline_registry import baseline_registry
 from habitat_baselines.utils.common import batch_obs
 
+import habitat_extensions
 from habitat_extensions.robots.pybullet_utils import PybulletRobot, pose2mat
 from mobile_manipulation.methods.skill import Skill
 from mobile_manipulation.ppo.policy import ActorCritic
 from mobile_manipulation.utils.common import get_state_dict_by_prefix
+
+HAB_EXT_DIR = os.path.dirname(habitat_extensions.__file__)
 
 
 class Skill:
@@ -55,7 +58,7 @@ class ResetArm(Skill):
             "action": "ARM_ACTION",
             "action_args": {
                 "arm_action": delta_qpos / 0.0125,
-                "grip_action": 1 if obs["is_grasped"] else -1,
+                "grip_action": 1 if obs["is_grasped"] > 0.5 else -1,
             },
         }
 
@@ -214,7 +217,8 @@ class PickRLSkill(RLSkill):
         if obs["is_grasped"] < 0.5:
             return False
         gripper_pos = obs["gripper_pos_at_base"]
-        resting_pos = np.float32([0.5, 1.0, 0.0])
+        # resting_pos = np.float32([0.5, 1.0, 0.0])
+        resting_pos = np.float32([0.639385, 0.953493, 0.251007])
         gripper_to_resting_dist = np.linalg.norm(gripper_pos - resting_pos)
         return gripper_to_resting_dist <= 0.15
 
@@ -244,13 +248,16 @@ class PlaceRLSkill(RLSkill):
         if obs["is_grasped"] > 0.5:
             return False
         gripper_pos = obs["gripper_pos_at_base"]
-        resting_pos = np.float32([0.5, 1.0, 0.0])
+        # resting_pos = np.float32([0.5, 1.0, 0.0])
+        resting_pos = np.float32([0.639385, 0.953493, 0.251007])
         gripper_to_resting_dist = np.linalg.norm(gripper_pos - resting_pos)
         return gripper_to_resting_dist <= 0.15
 
 
 class PPOAgent(habitat.Agent):
-    def __init__(self):
+    def __init__(self, models_dir, debug=False):
+        self.models_dir = models_dir
+        self.debug = debug
         self._initialize_pyb()
 
         obs_space = spaces.Dict(
@@ -265,20 +272,36 @@ class PPOAgent(habitat.Agent):
             nav_goal_at_base=spaces.Box(-1, 1, [3]),
         )
 
+        if self.debug:
+            ckpt_paths = dict(
+                # nav="nav_v0_disc_SCR/221007.seed=100.default/checkpoints/ckpt.-1.pth",
+                # pick="pick_v0_joint_SCR/221007.seed=100.default/checkpoints/ckpt.-1.pth",
+                # place="place_v0_joint_SCR/221007.seed=100.default/checkpoints/ckpt.-1.pth",
+                nav="nav_v0_disc_SCR/221012.seed=100.default/checkpoints/ckpt.-1.pth",
+                pick="pick_v0_joint_SCR/221012.seed=100.default/checkpoints/ckpt.-1.pth",
+                place="place_v0_joint_SCR/221012.seed=100.default/checkpoints/ckpt.-1.pth",
+            )
+        else:
+            ckpt_paths = dict(
+                nav="nav.pth",
+                pick="pick.pth",
+                place="place.pth",
+            )
+
         # Individual skills
         self.nav_skill = NavRLSkill(
             obs_space=obs_space,
-            ckpt_path="/home/jiayuan/projects/rearrange-challenge/data/results/rearrange/skills/challenge/nav_v0_disc_SCR/221007.seed=100.default/checkpoints/ckpt.-1.pth",
+            ckpt_path=os.path.join(models_dir, ckpt_paths["nav"]),
             timeout=500,
         ).to("cuda")
         self.pick_skill = PickRLSkill(
             obs_space=obs_space,
-            ckpt_path="/home/jiayuan/projects/rearrange-challenge/data/results/rearrange/skills/challenge/pick_v0_joint_SCR/221007.seed=100.default/checkpoints/ckpt.-1.pth",
+            ckpt_path=os.path.join(models_dir, ckpt_paths["pick"]),
             timeout=200,
         ).to("cuda")
         self.place_skill = PlaceRLSkill(
             obs_space=obs_space,
-            ckpt_path="/home/jiayuan/projects/rearrange-challenge/data/results/rearrange/skills/challenge/place_v0_joint_SCR/221007.seed=100.default/checkpoints/ckpt.-1.pth",
+            ckpt_path=os.path.join(models_dir, ckpt_paths["place"]),
             timeout=200,
         ).to("cuda")
         self.reset_arm = ResetArm(timeout=50)
@@ -298,7 +321,7 @@ class PPOAgent(habitat.Agent):
 
     @property
     def current_skill(self):
-        if self.skill_idx >= len(self.skill_seq):
+        if self.skill_idx is None or self.skill_idx >= len(self.skill_seq):
             return None
         return self.skill_seq[self.skill_idx]
 
@@ -307,7 +330,9 @@ class PPOAgent(habitat.Agent):
         self.current_skill.reset(None)
 
     def _initialize_pyb(self):
-        ARM_URDF = "/home/jiayuan/projects/rearrange-challenge/habitat_extensions/assets/robots/hab_fetch/robots/hab_fetch_arm_v2.urdf"
+        ARM_URDF = os.path.join(
+            HAB_EXT_DIR, "assets/robots/hab_fetch/robots/hab_fetch_arm_v2.urdf"
+        )
         self.pyb_robot = PybulletRobot(
             ARM_URDF, joint_indices=[0, 1, 2, 3, 4, 5, 6], ee_link_idx=8
         )
@@ -326,9 +351,9 @@ class PPOAgent(habitat.Agent):
     def parse_raw_obs(self, raw_obs: dict):
         # Resize depth
         robot_head_depth = raw_obs["robot_head_depth"]
-        # robot_head_depth = cv2.resize(
-        #     robot_head_depth, (128, 128), cv2.INTER_NEAREST
-        # )[..., None]
+        robot_head_depth = cv2.resize(
+            robot_head_depth, (128, 128), cv2.INTER_NEAREST
+        )[..., None]
 
         # Compute end-effector pose
         arm_joint_pos = raw_obs["joint"]
@@ -377,10 +402,9 @@ class PPOAgent(habitat.Agent):
         return obs
 
     def act(self, obs):
-        import cv2
-
-        cv2.imshow("debug", obs["robot_head_rgb"][..., ::-1])
-        cv2.waitKey(0)
+        if self.debug:
+            cv2.imshow("debug", obs["robot_head_rgb"][..., ::-1])
+            cv2.waitKey(0)
 
         obs = self.parse_raw_obs(obs)
 
@@ -404,9 +428,22 @@ class PPOAgent(habitat.Agent):
 
 
 def main():
-    agent = PPOAgent()
-    challenge = habitat.Challenge(eval_remote=False)
-    challenge._env.seed(7)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--evaluation", type=str, required=True, choices=["local", "remote"]
+    )
+    parser.add_argument("--models-dir", type=str, required=True)
+    parser.add_argument("--debug", action="store_true")
+    args = parser.parse_args()
+
+    agent = PPOAgent(args.models_dir, debug=args.debug)
+
+    if args.evaluation == "local":
+        challenge = habitat.Challenge(eval_remote=False)
+        challenge._env.seed(7)
+    else:
+        challenge = habitat.Challenge(eval_remote=True)
+
     challenge.submit(agent)
 
 
