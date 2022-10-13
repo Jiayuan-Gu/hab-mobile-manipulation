@@ -141,7 +141,7 @@ class GeoDistanceToNavGoalsV1(MyMeasure):
 @registry.register_measure
 class AngDistanceToGoal(MyMeasure):
     def update_metric(self, *args, task: RearrangeNavTask, **kwargs):
-        if task.sub_task_type == "place":
+        if task.sub_task == "place":
             goal_pos = task.place_goal
         else:
             goal_pos = task.pick_goal

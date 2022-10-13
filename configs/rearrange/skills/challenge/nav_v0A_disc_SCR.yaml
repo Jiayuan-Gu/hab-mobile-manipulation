@@ -1,0 +1,2 @@
+__BASE__: "{fileDirname}/nav_v0_disc_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/challenge/nav_v0A.yaml"

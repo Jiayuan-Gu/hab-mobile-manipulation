@@ -1,0 +1,15 @@
+__BASE__: "{fileDirname}/nav_v0.yaml"
+
+TASK:
+  AngDistanceToNavGoal:
+    UUID: "ang_dist_to_nav_goal"
+    TYPE: AngDistanceToGoal
+  RearrangeNavSuccess:
+    TYPE: RearrangeNavSuccess
+    GEO_THRESHOLD: 0.25
+    ANG_THRESHOLD: 0.25
+  RearrangeNavReward:
+    TYPE: RearrangeNavReward
+    GEO_DIST_REWARD: 1.0
+    ANG_DIST_REWARD: 0.0
+    ANG_REWARD_THRESH: -1.0
