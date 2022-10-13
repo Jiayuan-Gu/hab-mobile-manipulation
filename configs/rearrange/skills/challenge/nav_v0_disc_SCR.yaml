@@ -14,6 +14,7 @@ RL:
   ACTION_NAME: "BaseDiscVelAction"
   REWARD_MEASURES:
     - "rearrange_nav_reward"
+    - "force_penalty"
   SUCCESS_MEASURE: rearrange_nav_success
   SUCCESS_REWARD: 2.5
   SLACK_REWARD: -0.002

@@ -150,6 +150,7 @@ class GripperPositionSensor(PositionSensor):
     cls_uuid = "gripper_pos"
 
     def _get_world_position(self, *args, **kwargs):
+        # print(self._sim.robot.sim_obj.transformation.inverted() @ self._sim.robot.ee_transform)
         return self._sim.robot.gripper_pos
 
 

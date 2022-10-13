@@ -305,6 +305,7 @@ class RearrangeSimV1(HabitatSim):
         self.gripper.reconfigure()
         if not is_same_scene:
             self.robot.reconfigure()
+            # print(art_utils.get_links_info(self.robot.sim_obj))
             # self.robot.set_semantic_ids(100)
         # elif self._initial_state is not None:
         #     self.robot.set_state(self._initial_state["robot_state"])

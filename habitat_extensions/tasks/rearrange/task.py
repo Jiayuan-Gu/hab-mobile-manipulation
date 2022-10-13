@@ -173,19 +173,34 @@ class RearrangeTask(EmbodiedTask):
 
         return np.float32(start_ee_pos)
 
-    def _initialize_ee_pos(self, start_ee_pos=None):
-        """Initialize end-effector position."""
-        if start_ee_pos is None:
-            start_ee_pos = self._get_start_ee_pos()
+    # def _initialize_ee_pos(self, start_ee_pos=None):
+    #     """Initialize end-effector position."""
+    #     if start_ee_pos is None:
+    #         start_ee_pos = self._get_start_ee_pos()
 
-        # print("start_ee_pos", start_ee_pos)
-        self.start_ee_pos = start_ee_pos
+    #     # print("start_ee_pos", start_ee_pos)
+    #     self.start_ee_pos = start_ee_pos
+    #     self._sim.robot.reset_arm()
+    #     self._sim.sync_pyb_robot()
+    #     arm_tgt_qpos = self._sim.pyb_robot.IK(self.start_ee_pos, max_iters=100)
+    #     # err = self._sim.pyb_robot.compute_IK_error(start_ee_pos, arm_tgt_qpos)
+    #     self._sim.robot.arm_joint_pos = arm_tgt_qpos
+    #     self._sim.robot.arm_motor_pos = arm_tgt_qpos
+
+    def _initialize_ee_pos(self, start_ee_pos=None):
         self._sim.robot.reset_arm()
-        self._sim.sync_pyb_robot()
-        arm_tgt_qpos = self._sim.pyb_robot.IK(self.start_ee_pos, max_iters=100)
-        # err = self._sim.pyb_robot.compute_IK_error(start_ee_pos, arm_tgt_qpos)
+        noise = self.np_random.normal(
+            0, 0.05, size=len(self._sim.robot.arm_joint_pos)
+        )
+        arm_tgt_qpos = self._sim.robot.arm_joint_pos + np.clip(
+            noise, -0.1, 0.1
+        )
         self._sim.robot.arm_joint_pos = arm_tgt_qpos
         self._sim.robot.arm_motor_pos = arm_tgt_qpos
+
+        self._sim.sync_pyb_robot()
+        self.start_ee_pos = self._sim.pyb_robot.ee_state[4]
+        # print("ee_pos", self._sim.robot.base_T.inverted().transform_point(self._sim.robot.gripper_pos))
 
     def _reset_stats(self):
         # NOTE(jigu): _is_episode_active is on-the-fly set in super().step()

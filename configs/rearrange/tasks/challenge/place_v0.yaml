@@ -70,7 +70,7 @@ TASK:
     TYPE: RearrangePlaceSuccess
     THRESHOLD: 0.05
   RearrangePlaceReward:
-    TYPE: RearrangePlaceRewardV1
+    TYPE: RearrangePlaceRewardV2
     DIST_REWARD: 4.0
     USE_DIFF: True
     RELEASE_REWARD: 1.0
