@@ -9,6 +9,14 @@ conda install -y habitat-sim-rearrange-challenge-2022  withbullet  headless -c c
 python -m habitat_sim.utils.datasets_download --uids rearrange_task_assets
 ```
 
+## Submit to EvalAI
+
+```bash
+docker build . --file docker/submission.Dockerfile  -t rearrange_submission
+evalai push rearrange_submission:latest --phase habitat-rearrange-easy-minival-2022-1820 --private
+evalai push rearrange_submission:latest --phase habitat-rearrange-easy-test-standard-2022-1820 --private
+```
+
 ## Notes
 
 - remove largest island check

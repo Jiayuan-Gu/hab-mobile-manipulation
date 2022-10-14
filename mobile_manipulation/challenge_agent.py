@@ -278,6 +278,7 @@ class PPOAgent(habitat.Agent):
                 # pick="pick_v0_joint_SCR/221007.seed=100.default/checkpoints/ckpt.-1.pth",
                 # place="place_v0_joint_SCR/221007.seed=100.default/checkpoints/ckpt.-1.pth",
                 nav="nav_v0_disc_SCR/221012.seed=100.default/checkpoints/ckpt.-1.pth",
+                # nav="nav_v0A_disc_SCR/221013.seed=100.default/checkpoints/ckpt.-1.pth",
                 pick="pick_v0_joint_SCR/221012.seed=100.default/checkpoints/ckpt.-1.pth",
                 place="place_v0_joint_SCR/221012.seed=100.default/checkpoints/ckpt.-1.pth",
             )
@@ -411,8 +412,9 @@ class PPOAgent(habitat.Agent):
         if self.current_skill.should_terminate(obs):
             self.skill_idx += 1
             if self.current_skill is not None:
-                skill_name = self.current_skill.__class__.__name__
-                print("Skill <{}> begin.".format(skill_name))
+                if self.debug:
+                    skill_name = self.current_skill.__class__.__name__
+                    print("Skill <{}> begin.".format(skill_name))
                 self.current_skill.reset(obs)
 
         if self.current_skill is None:
@@ -420,7 +422,8 @@ class PPOAgent(habitat.Agent):
                 "action": "REARRANGE_STOP",
                 "action_args": {"REARRANGE_STOP": [1.0]},
             }
-            print("Terminate the episode")
+            if self.debug:
+                print("Terminate the episode")
         else:
             step_action = self.current_skill.act(obs)
 
