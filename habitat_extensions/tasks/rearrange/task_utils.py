@@ -372,7 +372,9 @@ def filter_by_island_radius(
             # p2 will be a Vector3D if p is np.float64
             p2 = sim.pathfinder.snap_point(p)
             assert not np.isnan(p2).any(), p
-            assert np.linalg.norm(p2 - p) <= threshold, (p, p2)
+            # assert np.linalg.norm(p2 - p) <= threshold, (p, p2)
+            if np.linalg.norm(p2 - p) > threshold:
+                raise RuntimeError((p, p2), sim._current_scene, sim.habitat_config.EPISODE["episode_id"])
             p = p2
         if sim.is_at_larget_island(p):
             positions2.append(p)
@@ -419,6 +421,7 @@ def compute_region_goals_v1(
     meters_per_pixel=0.05,
     delta_size=0.1,
     max_radius=2.0,
+    postprocessing=True,
     debug=False,
 ):
     xyz = get_navigable_positions(sim, height, meters_per_pixel)
@@ -438,9 +441,10 @@ def compute_region_goals_v1(
             # print("search for a larger radius", radius)
             continue
         else:
-            xyz2 = filter_by_island_radius(
-                sim, xyz2, threshold=meters_per_pixel + 0.01
-            )
+            if postprocessing:
+                xyz2 = filter_by_island_radius(
+                    sim, xyz2, threshold=meters_per_pixel + 0.01
+                )
             if len(xyz2) == 0:
                 radius += delta_size
                 # print("search for a larger radius", radius)

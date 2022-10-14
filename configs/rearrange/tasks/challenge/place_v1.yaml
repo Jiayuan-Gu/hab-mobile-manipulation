@@ -1,0 +1,19 @@
+__BASE__: "{fileDirname}/place_v0.yaml"
+
+TASK:
+  TYPE: RearrangePlaceTask-v1
+  
+  START_REGION_SIZE: 2.0
+  MAX_REGION_SIZE: 2.0
+
+  POSSIBLE_ACTIONS:
+    - BaseArmGripperAction
+    - BaseArmGripperAction2
+  
+  ACTIONS:
+    BaseArmGripperAction:
+      GRIPPER_ACTION:
+        DISABLE_GRASP: True
+    BaseArmGripperAction2:
+      GRIPPER_ACTION:
+        DISABLE_GRASP: True

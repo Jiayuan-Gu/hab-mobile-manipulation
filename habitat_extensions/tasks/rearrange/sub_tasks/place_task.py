@@ -12,6 +12,7 @@ from ..task_utils import (
     compute_region_goals_v1,
     compute_start_state,
     sample_noisy_start_state,
+    filter_by_island_radius
 )
 from .pick_task import RearrangePickTask
 
@@ -191,6 +192,7 @@ class RearrangePlaceTaskV1(RearrangePlaceTask):
                 episode.episode_id
             )
         else:
+            self._maybe_recompute_navmesh(episode, disable=False)
             start_pos, _ = compute_start_state(self._sim, self.place_goal)
             height = start_pos[1]
             T = mn.Matrix4.translation(self.place_goal)
@@ -202,8 +204,11 @@ class RearrangePlaceTaskV1(RearrangePlaceTask):
                 radius=self._config.START_REGION_SIZE,
                 height=height,
                 max_radius=self._config.MAX_REGION_SIZE,
+                postprocessing=False,
                 debug=False,
             )
+            self._maybe_restore_navmesh(episode, disable=False)
+            start_positions = filter_by_island_radius(self._sim, start_positions, threshold=0.5)
             self._set_cache_start_positions(
                 episode.episode_id, start_positions
             )
@@ -251,3 +256,13 @@ class RearrangePlaceTaskV1(RearrangePlaceTask):
                 if verbose:
                     print(f"Find a valid start state at {i}-th trial")
                 return start_state
+
+    def _maybe_recompute_navmesh(self, episode: RearrangeEpisode, disable=True):
+        if disable:
+            return
+        super()._maybe_recompute_navmesh(episode)
+
+    def _maybe_restore_navmesh(self, episode: RearrangeEpisode, disable=True):
+        if disable:
+            return
+        super()._maybe_restore_navmesh(episode)

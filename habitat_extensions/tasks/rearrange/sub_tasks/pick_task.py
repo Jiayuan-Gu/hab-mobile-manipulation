@@ -10,7 +10,9 @@ from ..task_utils import (
     check_start_state,
     compute_region_goals_v1,
     compute_start_state,
+    filter_by_island_radius,
     sample_noisy_start_state,
+    visualize_positions_on_map,
 )
 
 
@@ -378,6 +380,7 @@ class RearrangePickTaskV1(RearrangePickTask):
                 episode.episode_id
             )
         else:
+            self._maybe_recompute_navmesh(episode, disable=False)
             pick_goal = (
                 self.pick_goal if self.pick_goal2 is None else self.pick_goal
             )
@@ -392,8 +395,13 @@ class RearrangePickTaskV1(RearrangePickTask):
                 radius=self._config.START_REGION_SIZE,
                 height=height,
                 max_radius=self._config.MAX_REGION_SIZE,
+                postprocessing=False,
                 debug=False,
             )
+            self._maybe_restore_navmesh(episode, disable=False)
+            # visualize_positions_on_map(start_positions, self._sim, height, 0.05)
+            start_positions = filter_by_island_radius(self._sim, start_positions, threshold=0.5)
+            # visualize_positions_on_map(start_positions, self._sim, height, 0.05)
             # NOTE(jigu): it is not accurate for drawer
             self._set_cache_start_positions(
                 episode.episode_id, start_positions
@@ -443,3 +451,13 @@ class RearrangePickTaskV1(RearrangePickTask):
                 if verbose:
                     print(f"Find a valid start state at {i}-th trial")
                 return start_state
+
+    def _maybe_recompute_navmesh(self, episode: RearrangeEpisode, disable=True):
+        if disable:
+            return
+        super()._maybe_recompute_navmesh(episode)
+
+    def _maybe_restore_navmesh(self, episode: RearrangeEpisode, disable=True):
+        if disable:
+            return
+        super()._maybe_restore_navmesh(episode)
