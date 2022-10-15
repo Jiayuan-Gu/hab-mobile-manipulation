@@ -13,6 +13,7 @@ from ..task_utils import (
     compute_region_goals_v1,
     compute_start_positions_from_map_v1,
     compute_start_state,
+    filter_by_island_radius,
     filter_positions,
     sample_navigable_point_within_region,
     sample_random_start_state_v1,
@@ -410,6 +411,8 @@ class RearrangeNavTaskV1(RearrangeNavTask):
 
         height = self._sim.pathfinder.snap_point(self.pick_goal)[1]
         assert not np.isnan(height), self.pick_goal
+        # A hack to avoid stair
+        height = min(0.11094765, height)
         receptacle_link_id = self.tgt_receptacle_info[1]
 
         self.marker = None
@@ -431,7 +434,8 @@ class RearrangeNavTaskV1(RearrangeNavTask):
             elif self._has_target_in_drawer():  # only for pick
                 marker_name = "cab_push_point_{}".format(receptacle_link_id)
                 self.marker = self._sim.markers[marker_name]
-                self.spawn_region = mn.Range2D([0.30, -0.35], [0.45, 0.35])
+                # self.spawn_region = mn.Range2D([0.30, -0.35], [0.45, 0.35])
+                self.spawn_region = mn.Range2D([0.3, -0.4], [0.5, 0.4])
                 self.spawn_T = self.marker.transformation
                 radius = None
             else:
@@ -450,8 +454,21 @@ class RearrangeNavTaskV1(RearrangeNavTask):
                         region=self.spawn_region,
                         radius=radius,
                         height=height,
+                        postprocessing=False,
                         debug=False,
                     )
+                    if len(self.nav_goals) == 0:
+                        self._maybe_recompute_navmesh(episode)
+                        self.nav_goals = compute_region_goals_v1(
+                            self._sim,
+                            T=mn.Matrix4.translation(self.look_at_pos),
+                            region=None,
+                            radius=0.8,
+                            height=height,
+                            postprocessing=False,
+                            debug=False,
+                        )
+                        self._maybe_restore_navmesh(episode)
                 else:
                     self.nav_goals = compute_region_goals_v1(
                         self._sim,
@@ -459,12 +476,17 @@ class RearrangeNavTaskV1(RearrangeNavTask):
                         region=self.spawn_region,
                         radius=radius,
                         height=height,
+                        postprocessing=False,
                         debug=False,
                     )
+                self.nav_goals = filter_by_island_radius(
+                    self._sim, self.nav_goals, threshold=0.5
+                )
 
-                # The drawer can have different initial states for one episode
-                if not self._has_target_in_drawer():
-                    self._set_cache_nav_goals(episode.episode_id)
+                # # The drawer can have different initial states for one episode
+                # if not self._has_target_in_drawer():
+                #     self._set_cache_nav_goals(episode.episode_id)
+                self._set_cache_nav_goals(episode.episode_id)
 
             # Post-processing for picking or placing in fridge
             if self._has_target_in_fridge():

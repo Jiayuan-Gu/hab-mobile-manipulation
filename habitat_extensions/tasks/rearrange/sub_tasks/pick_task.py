@@ -386,6 +386,8 @@ class RearrangePickTaskV1(RearrangePickTask):
             )
             start_pos, _ = compute_start_state(self._sim, pick_goal)
             height = start_pos[1]
+            # A hack to avoid stair
+            height = min(0.11094765, height)
             T = mn.Matrix4.translation(pick_goal)
             # T = mn.Matrix4.translation(self.pick_goal)
             start_positions = compute_region_goals_v1(

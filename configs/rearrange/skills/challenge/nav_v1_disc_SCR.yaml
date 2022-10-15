@@ -1,0 +1,7 @@
+__BASE__: "{fileDirname}/nav_v0_disc_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/challenge/nav_v1.yaml"
+
+RL:
+  REWARD_MEASURES:
+    - "rearrange_nav_reward"
+    - "force_penalty"

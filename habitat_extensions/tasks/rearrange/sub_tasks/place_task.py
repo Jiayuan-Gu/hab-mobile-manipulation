@@ -195,6 +195,8 @@ class RearrangePlaceTaskV1(RearrangePlaceTask):
             self._maybe_recompute_navmesh(episode, disable=False)
             start_pos, _ = compute_start_state(self._sim, self.place_goal)
             height = start_pos[1]
+            # A hack to avoid stair
+            height = min(0.11094765, height)
             T = mn.Matrix4.translation(self.place_goal)
             # start_positions = compute_start_positions_from_map_v1(
             start_positions = compute_region_goals_v1(

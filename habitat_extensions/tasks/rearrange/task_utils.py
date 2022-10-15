@@ -374,7 +374,11 @@ def filter_by_island_radius(
             assert not np.isnan(p2).any(), p
             # assert np.linalg.norm(p2 - p) <= threshold, (p, p2)
             if np.linalg.norm(p2 - p) > threshold:
-                raise RuntimeError((p, p2), sim._current_scene, sim.habitat_config.EPISODE["episode_id"])
+                raise RuntimeError(
+                    (p, p2),
+                    sim._current_scene,
+                    sim.habitat_config.EPISODE["episode_id"],
+                )
             p = p2
         if sim.is_at_larget_island(p):
             positions2.append(p)
@@ -388,6 +392,7 @@ def compute_start_positions_from_map_v1(
     radius: float,
     height: float,
     meters_per_pixel=0.05,
+    postprocessing=True,
     debug=False,
 ):
     """Get candidates for start position (x, y, z) given the top-down map."""
@@ -406,7 +411,10 @@ def compute_start_positions_from_map_v1(
         mask = np.logical_and(mask, mask2)
 
     xyz = xyz[mask]
-    xyz = filter_by_island_radius(sim, xyz, threshold=meters_per_pixel + 0.01)
+    if postprocessing:
+        xyz = filter_by_island_radius(
+            sim, xyz, threshold=meters_per_pixel + 0.01
+        )
     if debug:
         visualize_positions_on_map(xyz, sim, height, meters_per_pixel)
     return xyz
