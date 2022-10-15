@@ -8,6 +8,7 @@ import attr
 import habitat_sim
 import magnum as mn
 import numpy as np
+from habitat import logger
 from habitat.config import Config
 from habitat.core.dataset import Dataset, Episode
 from habitat.core.embodied_task import EmbodiedTask
@@ -297,3 +298,22 @@ class RearrangeTask(EmbodiedTask):
         self._sim.pathfinder.load_nav_mesh(navmesh_path)
         self._sim._cache_largest_island()
         self._recompute_navmesh = False
+
+    def _check_art_abnormal(self, episode: RearrangeEpisode):
+        art_obj_mgr = self._sim.get_articulated_object_manager()
+        flag = True
+        for ao_handle, ao_state in episode.ao_states.items():
+            art_obj = art_obj_mgr.get_object_by_handle(ao_handle)
+            qpos = art_obj.joint_positions
+            for link_id, joint_state in ao_state.items():
+                pos_offset = art_obj.get_link_joint_pos_offset(int(link_id))
+                if np.abs(qpos[pos_offset] - joint_state) > 0.05:
+                    flag = True
+                    break
+
+        if flag:
+            logger.info(
+                "Episode {}({}): detected abnormal".format(
+                    episode.episode_id, episode.scene_id
+                )
+            )

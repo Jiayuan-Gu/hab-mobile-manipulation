@@ -156,8 +156,12 @@ class RearrangePickTask(RearrangeTask):
         err = np.linalg.norm(obj_pos - self.pick_goal)
         if err > self._err_thresh:
             logger.warning(
-                "Episode {}({}): pick goal err {} > {}".format(
-                    episode.episode_id, self.tgt_idx, err, self._err_thresh
+                "Episode {}/{}({}): pick goal err {} > {}".format(
+                    episode.episode_id,
+                    self.tgt_idx,
+                    episode.scene_id,
+                    err,
+                    self._err_thresh,
                 )
             )
             logger.info(
@@ -213,9 +217,9 @@ class RearrangePickTask(RearrangeTask):
                 receptacle_link_id
             )
 
-            init_range = self._config.get("DRAWER_INIT_RANGE", [0.5, 0.5])
-            init_qpos = self.np_random.uniform(*init_range)
-            self._err_thresh = init_qpos + 0.01
+            # init_range = self._config.get("DRAWER_INIT_RANGE", [0.5, 0.5])
+            # init_qpos = self.np_random.uniform(*init_range)
+            # self._err_thresh = init_qpos + 0.01
 
             # Dynamic way to set link
             # self._sim.set_joint_pos_by_motor(
@@ -402,7 +406,9 @@ class RearrangePickTaskV1(RearrangePickTask):
             )
             self._maybe_restore_navmesh(episode, disable=False)
             # visualize_positions_on_map(start_positions, self._sim, height, 0.05)
-            start_positions = filter_by_island_radius(self._sim, start_positions, threshold=0.5)
+            start_positions = filter_by_island_radius(
+                self._sim, start_positions, threshold=0.5
+            )
             # visualize_positions_on_map(start_positions, self._sim, height, 0.05)
             # NOTE(jigu): it is not accurate for drawer
             self._set_cache_start_positions(
@@ -454,7 +460,9 @@ class RearrangePickTaskV1(RearrangePickTask):
                     print(f"Find a valid start state at {i}-th trial")
                 return start_state
 
-    def _maybe_recompute_navmesh(self, episode: RearrangeEpisode, disable=True):
+    def _maybe_recompute_navmesh(
+        self, episode: RearrangeEpisode, disable=True
+    ):
         if disable:
             return
         super()._maybe_recompute_navmesh(episode)

@@ -12,7 +12,7 @@ from ..task_utils import (
     compute_region_goals_v1,
     compute_start_state,
     sample_noisy_start_state,
-    filter_by_island_radius
+    filter_by_island_radius,
 )
 from .pick_task import RearrangePickTask
 
@@ -210,7 +210,9 @@ class RearrangePlaceTaskV1(RearrangePlaceTask):
                 debug=False,
             )
             self._maybe_restore_navmesh(episode, disable=False)
-            start_positions = filter_by_island_radius(self._sim, start_positions, threshold=0.5)
+            start_positions = filter_by_island_radius(
+                self._sim, start_positions, threshold=0.5
+            )
             self._set_cache_start_positions(
                 episode.episode_id, start_positions
             )
@@ -259,7 +261,9 @@ class RearrangePlaceTaskV1(RearrangePlaceTask):
                     print(f"Find a valid start state at {i}-th trial")
                 return start_state
 
-    def _maybe_recompute_navmesh(self, episode: RearrangeEpisode, disable=True):
+    def _maybe_recompute_navmesh(
+        self, episode: RearrangeEpisode, disable=True
+    ):
         if disable:
             return
         super()._maybe_recompute_navmesh(episode)

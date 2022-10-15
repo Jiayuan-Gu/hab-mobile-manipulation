@@ -72,6 +72,7 @@ TASK:
 DATASET:
   TYPE: RearrangeDataset-v0
   SPLIT: "minival"
-  DATA_PATH: "data/datasets/replica_cad/rearrange/v1/{split}/rearrange_easy.json.gz"
+  # DATA_PATH: "data/datasets/replica_cad/rearrange/v1/{split}/rearrange_easy.json.gz"
+  DATA_PATH: "data/datasets/replica_cad/rearrange/v1/{split}/rearrange_easy.v1.json.gz"
   EPISODE_IDS: []
   NUM_EPISODES: -1
