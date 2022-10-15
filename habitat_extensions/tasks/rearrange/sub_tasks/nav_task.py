@@ -426,8 +426,8 @@ class RearrangeNavTaskV1(RearrangeNavTask):
 
             if self._has_target_in_fridge():
                 self.marker = self._sim.markers["fridge_push_point"]
-                # self.spawn_region = mn.Range2D([0.933, -0.6], [1.833, 0.6])
-                self.spawn_region = mn.Range2D([1.0, -0.5], [1.8, 0.5])
+                self.spawn_region = mn.Range2D([0.933, -0.6], [1.833, 0.6])
+                # self.spawn_region = mn.Range2D([1.0, -0.5], [1.8, 0.5])
                 self.spawn_T = self.tgt_receptacle.transformation
                 # radius = 2.0
                 radius = None
