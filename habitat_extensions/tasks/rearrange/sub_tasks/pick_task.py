@@ -11,6 +11,7 @@ from ..task_utils import (
     compute_region_goals_v1,
     compute_start_state,
     filter_by_island_radius,
+    filter_positions,
     sample_noisy_start_state,
     visualize_positions_on_map,
 )
@@ -391,7 +392,8 @@ class RearrangePickTaskV1(RearrangePickTask):
             start_pos, _ = compute_start_state(self._sim, pick_goal)
             height = start_pos[1]
             # A hack to avoid stair
-            height = min(0.11094765, height)
+            if height > 0.2:
+                height = 0.11094765
             T = mn.Matrix4.translation(pick_goal)
             # T = mn.Matrix4.translation(self.pick_goal)
             start_positions = compute_region_goals_v1(
@@ -409,6 +411,14 @@ class RearrangePickTaskV1(RearrangePickTask):
             start_positions = filter_by_island_radius(
                 self._sim, start_positions, threshold=0.5
             )
+            # Post-processing for picking or placing in fridge
+            if self._has_target_in_fridge():
+                start_positions = filter_positions(
+                    start_positions,
+                    self._sim.markers["fridge_push_point"].transformation,
+                    direction=[-1.0, 0.0, 0.0],
+                    clearance=0.4,
+                )
             # visualize_positions_on_map(start_positions, self._sim, height, 0.05)
             # NOTE(jigu): it is not accurate for drawer
             self._set_cache_start_positions(
