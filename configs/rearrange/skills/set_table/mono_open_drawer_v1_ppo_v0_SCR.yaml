@@ -1,0 +1,11 @@
+__BASE__: "{fileDirname}/mono_open_drawer_ppo_v0_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/mono/open_drawer_v1.yaml"
+
+SPLIT_DATASET: False
+
+RL:
+  ACTION_NAME: "BaseArmGripperAction2"
+  REWARD_MEASURES:
+    - "composite_reward"
+    - "collision_penalty"
+    - "invalid_grasp_penalty"

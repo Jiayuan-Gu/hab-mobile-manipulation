@@ -1,0 +1,2 @@
+__BASE__: "{fileDirname}/mono_open_drawer_ppo_v0_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/mono/open_fridge.yaml"

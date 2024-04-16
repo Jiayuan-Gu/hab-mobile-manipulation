@@ -1,0 +1,37 @@
+__BASE__: "{fileDirname}/../__base__.py"
+BASE_RUN_DIR: "data/results/rearrange/composite/prepare_groceries_220417/{fileName}"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/composite/prepare_groceries.yaml"
+
+RL:
+  SUCCESS_MEASURE: ""
+  END_ON_SUCCESS: False
+
+SOLUTION:
+  SKILL_SEQUENCE:
+    - PickAndPlace
+    - ResetArm
+    - NextTarget
+    - PickAndPlace
+    - ResetArm
+    - NextTarget
+    - PickAndPlace
+    - ResetArm
+
+  SKILLS:
+    - PickAndPlace
+    - ResetArm
+    - NextTarget
+
+  PickAndPlace:
+    TYPE: PickPlaceRLSkill
+    ACTION: BaseArmGripperAction2
+    CKPT_PATH: "data/results/rearrange/skills/prepare_groceries_220417/mono_ppo_v0_SCR/220503.seed=100.pa_noadv/checkpoints/ckpt.10.pth"
+    TIMEOUT: 500
+    THRESHOLD: 0.15
+
+  NextTarget:
+    TYPE: NextTarget
+
+  ResetArm:
+    TYPE: ResetArm
+    TIMEOUT: 50

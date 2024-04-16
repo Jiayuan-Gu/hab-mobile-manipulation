@@ -1,0 +1,18 @@
+__BASE__: "{fileDirname}/tidy_house.yaml"
+
+TASK:
+  InvalidGraspPenalty:
+    TRUNCATE_EPISODE: True
+
+  CompositeReward:
+    RearrangePickReward:
+      TRUNCATE_PICK_WRONG: True
+      TRUNCATE_DROP: True
+    RearrangePlaceReward:
+      TRUNCATE_PICK_WRONG: True
+      TRUNCATE_DROP: True
+    RearrangeNavReward:
+      TYPE: RearrangeNavRewardV1
+      GEO_DIST_REWARD: 1.0
+      GRASP_PENALTY: 1.0
+      TRUNCATE_GRASP: True

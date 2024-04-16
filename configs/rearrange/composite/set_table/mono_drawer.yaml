@@ -1,0 +1,32 @@
+__BASE__: "{fileDirname}/../__base__.py"
+BASE_RUN_DIR: "data/results/rearrange/composite/set_table_220417/{fileName}"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/composite/set_table.yaml"
+
+RL:
+  SUCCESS_MEASURE: ""
+  END_ON_SUCCESS: False
+
+SOLUTION:
+  SKILL_SEQUENCE:
+    - PickAndPlace
+    - ResetArm
+
+  SKILLS:
+    - PickAndPlace
+    - ResetArm
+
+  PickAndPlace:
+    TYPE: PickPlaceRLSkill
+    ACTION: BaseArmGripperAction2
+    # CKPT_PATH: "data/results/rearrange/skills/set_table_220417/mono_open_drawer_ppo_v0_SCR/220503.debug.pa_noadv/checkpoints/ckpt.10.pth"
+    # CKPT_PATH: "data/results/rearrange/skills/set_table_220417/mono_open_drawer_ppo_v0_SCR/220509.seed=100.pa_noadv/checkpoints/ckpt.10.pth"
+    CKPT_PATH: "data/results/rearrange/skills/set_table_220417/mono_open_drawer_v1_ppo_v0_SCR/220515.seed=100.pa_no_adv/checkpoints/ckpt.10.pth"
+    TIMEOUT: 500
+    THRESHOLD: 0.15
+
+  NextTarget:
+    TYPE: NextTarget
+
+  ResetArm:
+    TYPE: ResetArm
+    TIMEOUT: 50

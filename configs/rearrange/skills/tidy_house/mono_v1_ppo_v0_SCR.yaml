@@ -1,0 +1,2 @@
+__BASE__: "{fileDirname}/mono_ppo_v0_SCR.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/mono/tidy_house_v1.yaml"

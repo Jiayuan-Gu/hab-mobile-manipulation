@@ -1,0 +1,127 @@
+__BASE__: "{fileDirname}/../base.yaml"
+
+DATASET:
+  DATA_PATH: "data/datasets/rearrange/v3/tidy_house_220417_{split}.json.gz"
+
+ENVIRONMENT:
+  MAX_EPISODE_STEPS: 500
+
+TASK:
+  TYPE: TidyHouseTask-v0
+  TARGET_INDEX: -1
+
+  POSSIBLE_ACTIONS:
+    - BaseArmGripperAction
+    - BaseArmGripperAction2
+    - EmptyAction
+
+  SENSORS:
+    # manip
+    - ArmJointPositionSensor
+    - GripperPositionSensor
+    - IsGraspedSensor
+    # pick
+    - PickGoalSensor
+    - PickGoalSensor2
+    # place
+    - PlaceGoalSensor
+    - PlaceGoalSensor2
+
+  MEASUREMENTS:
+    # manip
+    - GripperToRestingDistance
+    - GripperStatus
+    # - RobotForce
+    # - ForcePenalty
+    - InvalidGraspPenalty
+    # pick
+    - GripperToObjectDistance
+    # place
+    - ObjectToGoalDistance
+    - PlaceObjectSuccess
+    # composite
+    - StageSuccess
+    - CompositeSuccess
+    - CompositeReward
+
+  GripperToRestingDistance:
+    TYPE: GripperToRestingDistance
+  GripperStatus:
+    TYPE: GripperStatus
+
+  RobotForce:
+    TYPE: RobotForce
+    MIN_DELTA_FORCE: 20.0
+    INCLUDE_OBJ_COLLISIONS: True
+  ForcePenalty:
+    TYPE: ForcePenalty
+    FORCE_PENALTY: 0.001
+    MAX_FORCE_PENALTY: 0.2
+    MAX_ACCUM_FORCE: -1.0
+    MAX_ACCUM_FORCE_PENALTY: 1.0
+  InvalidGraspPenalty:
+    TYPE: InvalidGraspPenalty
+    PENALTY: 1.0
+    END_EPISODE: True
+
+  # pick
+  GripperToObjectDistance:
+    TYPE: GripperToObjectDistance
+  # place
+  ObjectToGoalDistance:
+    TYPE: ObjectToGoalDistance
+  PlaceObjectSuccess:
+    TYPE: PlaceObjectSuccess
+    THRESHOLD: 0.15
+
+  StageSuccess:
+    TYPE: StageSuccess
+    GOALS:
+      nav_pick_0:
+        - "robot_at(target_obj_pos,float|1.5)"
+      pick_0:
+        - "holding(target_obj)"
+        - "ee_at_rest(float|0.15)"
+      nav_place_0:
+        - "robot_at(target_goal_pos,float|1.5)"
+      place_0:
+        - "not_holding()"
+        - "at(target_obj_pos,target_goal_pos)"
+        - "ee_at_rest(float|0.15)"
+
+  CompositeSuccess:
+    TYPE: CompositeSuccess
+
+  CompositeReward:
+    TYPE: CompositeReward
+    STAGE_MEASURES:
+      - [RearrangeNavReward]
+      - [RearrangePickReward]
+      - [RearrangeNavReward]
+      - [RearrangePlaceReward]
+      - [RearrangePlaceReward]
+    MEASUREMENTS:
+      - RearrangePickReward
+      - RearrangePlaceReward
+      - RearrangeNavReward
+    STAGE_REWARD: 1.0
+    RearrangePickReward:
+      TYPE: RearrangePickReward
+      DIST_REWARD: 4.0
+      USE_DIFF: True
+      PICK_REWARD: 1.0
+      PICK_PENALTY: 1.0
+      DROP_PENALTY: 1.0
+    RearrangePlaceReward:
+      TYPE: RearrangePlaceRewardV1
+      DIST_REWARD: 4.0
+      USE_DIFF: True
+      RELEASE_REWARD: 1.0
+      RELEASE_PENALTY: 1.0
+      END_DROP: True
+      PICK_PENALTY: 1.0
+    RearrangeNavReward:
+      TYPE: RearrangeNavRewardV1
+      GEO_DIST_REWARD: 1.0
+      GRASP_PENALTY: 1.0
+      RADIUS: 0.8

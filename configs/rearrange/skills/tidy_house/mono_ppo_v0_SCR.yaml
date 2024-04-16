@@ -1,0 +1,38 @@
+__BASE__: "{fileDirname}/base.yaml"
+BASE_TASK_CONFIG_PATH: "configs/rearrange/tasks/mono/tidy_house.yaml"
+
+SENSORS:
+  - "HEAD_DEPTH_SENSOR"
+  - "ARM_DEPTH_SENSOR"
+  # - "THIRD_RGB_SENSOR"
+
+RL:
+  ACTION_NAME: "BaseArmGripperAction2"
+  REWARD_MEASURES:
+    - "composite_reward"
+    # - "force_penalty"
+    - "invalid_grasp_penalty"
+  SUCCESS_MEASURE: composite_success
+  SUCCESS_REWARD: 0.0
+  SLACK_REWARD: 0.0
+
+  POLICY:
+    name: CRPolicy
+    CRNet:
+      rgb_uuids: []
+      depth_uuids:
+        - "robot_head_depth"
+        - "robot_arm_depth"
+      state_uuids:
+        - "arm_joint_pos"
+        - "is_grasped"
+        - "gripper_pos_at_base"
+        - "pick_goal_at_gripper"
+        - "pick_goal_at_base"
+        - "place_goal_at_gripper"
+        - "place_goal_at_base"
+      hidden_size: 512
+      state_hidden_sizes: []
+      rnn_hidden_size: 512
+    GAUSSIAN_ACTOR:
+      std_init_bias: -1.0

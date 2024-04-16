@@ -1,0 +1,7 @@
+__BASE__: "{fileDirname}/tidy_house.yaml"
+
+DATASET:
+  DATA_PATH: "data/datasets/rearrange/v3/prepare_groceries_220417_{split}.json.gz"
+
+TASK:
+  FRIDGE_INIT: True

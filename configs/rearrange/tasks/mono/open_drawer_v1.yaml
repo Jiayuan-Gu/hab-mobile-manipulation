@@ -1,0 +1,31 @@
+__BASE__: "{fileDirname}/open_drawer.yaml"
+
+TASK:
+  MEASUREMENTS:
+    # manip
+    - GripperToRestingDistance
+    - GripperStatus
+    - GripperStatusV1
+    - InvalidGraspPenalty
+    # - RobotForce
+    # - ForcePenalty
+    - CollisionPenalty
+    # pick
+    - GripperToObjectDistance
+    # place
+    - ObjectToGoalDistance
+    - PlaceObjectSuccess
+    # set
+    - GripperToMarkerDistance
+    - MarkerToGoalDistance
+    - SetMarkerSuccess
+    # composite
+    - StageSuccess
+    - CompositeSuccess
+    - CompositeReward
+
+  # Avoid undesired behaviors (like penetration)
+  CollisionPenalty:
+    TYPE: CollisionPenalty
+    PENALTY: 1.0
+    MAX_FORCE: 5000

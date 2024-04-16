@@ -1,0 +1,76 @@
+__BASE__: "{fileDirname}/set_table.yaml"
+
+TASK:
+  TARGET_INDEX: 1
+
+  MarkerToGoalDistance:
+    TYPE: MarkerToGoalDistance
+    USE_ABS: False
+  SetMarkerSuccess:
+    TYPE: SetMarkerSuccess
+    THRESHOLD: 0.25
+
+  StageSuccess:
+    TYPE: StageSuccess
+    GOALS:
+      nav_open_1:
+        - "robot_at(target_start_pos|1,float|1.5)"
+      open_1:
+        - "not_holding()"
+        - "opened_fridge(target_marker|1)"
+      pick_1:
+        - "holding(target_obj|1)"
+        - "ee_at_rest(float|0.15)"
+      nav_place_1:
+        - "robot_at(target_goal_pos|1,float|1.5)"
+      place_1:
+        - "not_holding()"
+        - "at(target_obj_pos|1,target_goal_pos|1)"
+        - "ee_at_rest(float|0.15)"
+
+  CompositeReward:
+    TYPE: CompositeReward
+    RESET_GS: True
+    STAGE_MEASURES:
+      - [RearrangeNavReward]
+      - [RearrangeSetMarkerReward]
+      - [RearrangePickReward]
+      - [RearrangeNavReward]
+      - [RearrangePlaceReward]
+      - [RearrangePlaceReward]
+    MEASUREMENTS:
+      - RearrangePickReward
+      - RearrangePlaceReward
+      - RearrangeNavReward
+      - RearrangeSetMarkerReward
+    STAGE_REWARD: 1.0
+    RearrangePickReward:
+      TYPE: RearrangePickReward
+      DIST_REWARD: 4.0
+      USE_DIFF: True
+      PICK_REWARD: 1.0
+      PICK_PENALTY: 1.0
+      DROP_PENALTY: 1.0
+    RearrangePlaceReward:
+      TYPE: RearrangePlaceRewardV1
+      DIST_REWARD: 4.0
+      USE_DIFF: True
+      RELEASE_REWARD: 1.0
+      RELEASE_PENALTY: 1.0
+      END_DROP: True
+      PICK_PENALTY: 1.0
+    RearrangeNavReward:
+      TYPE: RearrangeNavRewardV1
+      GEO_DIST_REWARD: 1.0
+      GRASP_PENALTY: 1.0
+      RADIUS: 0.8
+    RearrangeSetMarkerReward:
+      TYPE: RearrangeSetMarkerReward
+      DIST_REWARD: 2.0
+      SUCC_REWARD: 0.0
+      PICK_REWARD: 1.0
+      PICK_PENALTY: 1.0
+      END_PICK_WRONG: True
+      DROP_REWARD: 1.0
+      DROP_PENALTY: 1.0
+      END_DROP: True
