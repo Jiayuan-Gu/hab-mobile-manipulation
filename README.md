@@ -79,7 +79,7 @@ python -m habitat_sim.utils.datasets_download --uids rearrange_task_assets
 python -c "from habitat.datasets.utils import check_and_gen_physics_config; check_and_gen_physics_config()"
 # Download generated episodes
 pip install gdown
-gdown https://drive.google.com/drive/folders/1oEhsiqoWcEA2FNuQd9QfCPKNKgSwHbaW -O data/datasets/rearrange/v3 --folder
+gdown https://drive.google.com/drive/folders/17GVlYdVlrI2F1j-UXMb5kqwnNDxaA3oM -O data/datasets/rearrange/v3 --folder
 ```
 
 To re-generate our episodes, please refer to [episode generation](INSTRUCTIONS.md#episode-generation).
