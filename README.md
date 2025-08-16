@@ -119,7 +119,8 @@ python mobile_manipulation/run_ppo.py --cfg configs/rearrange/skills/tidy_house/
 python mobile_manipulation/run_ppo.py --cfg configs/rearrange/skills/tidy_house/pick_v1_joint_SCR.yaml --run-type eval --run-type eval PREFIX seed=100
 ```
 
-Pretrained skills can be downloaded [here](https://drive.google.com/drive/folders/1u7DAd25PE818wjg-MxDKJ7y5n8GQtfrz?usp=sharing).
+Pretrained skills can be downloaded [here](https://drive.google.com/drive/folders/1KNvoXsswbu2v9w3hlNZIYFlWnEySFdrD?usp=sharing).
+
 
 ```bash
 pip install gdown
